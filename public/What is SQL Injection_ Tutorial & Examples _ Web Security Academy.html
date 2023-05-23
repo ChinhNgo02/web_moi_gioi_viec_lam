@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<!-- saved from url=(0050)https://portswigger.net/web-security/sql-injection -->
+<html class="no-touch"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            <script type="text/javascript" async="" src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/recaptcha__vi.js.tải xuống" crossorigin="anonymous" integrity="sha384-jdX3eCtQdp0D4RKS29J0vqdbelYFn8Hh0MEmfgc8RGnrs2Z4TA/6UljkZ4vn3r8c" nonce=""></script><script async="" src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/analytics.js.tải xuống"></script><script type="text/javascript" async="" src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/js" nonce=""></script><script type="text/javascript" async="" src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/analytics.js.tải xuống" nonce=""></script><script async="" src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/gtm.js.tải xuống"></script><script nonce="">
+        (function (w, d, s, l, i) {
+            w[l] = w[l] || [];
+            w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            });
+            var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
+            j.async = true;
+            j.src =
+                'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+            f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-M4CF4TD');
+    </script>
+
+        
+        <meta content="IE=edge" http-equiv="X-UA-Compatible">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <title>What is SQL Injection? Tutorial &amp; Examples | Web Security Academy</title>
+        <meta name="description" content="In this section, we&#39;ll explain what SQL injection (SQLi) is, describe some common examples, explain how to find and exploit various kinds of SQL injection ...">
+        
+<script nonce="">
+    const dimensionName = "dimension2";
+    const userRef = "";
+</script>
+
+        <!-- Twitter data -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="What is SQL Injection? Tutorial &amp; Examples | Web Security Academy">
+    <meta name="twitter:description" content="In this section, we&#39;ll explain what SQL injection (SQLi) is, describe some common examples, explain how to find and exploit various kinds of SQL injection ...">
+<meta name="twitter:image" content="https://portswigger.net/content/images/logos/academy-twittercard.png">
+    <meta name="twitter:site" content="@WebSecAcademy">
+
+<!-- Open Graph data -->
+<meta property="og:title" content="What is SQL Injection? Tutorial &amp; Examples | Web Security Academy">
+    <meta property="og:description" content="In this section, we&#39;ll explain what SQL injection (SQLi) is, describe some common examples, explain how to find and exploit various kinds of SQL injection ...">
+<meta property="og:url" content="https://portswigger.net/web-security/sql-injection">
+<meta property="og:image" content="https://portswigger.net/content/images/logos/academy-twittercard.png">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://portswigger.net/web-security/sql-injection">
+<link rel="icon" href="https://portswigger.net/content/images/logos/favicon.ico" type="image/x-icon">
+<link rel="apple-touch-icon" href="https://portswigger.net/content/images/logos/apple-touch-icon.png">
+        <link href="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/psacademy.css" rel="stylesheet" type="text/css">
+        <link rel="preload" href="https://portswigger.net/content/fonts/ps-icons-small/ps-icons-small.woff?td2uot" as="font" crossorigin="anonymous">
+<link rel="preload" href="https://portswigger.net/content/fonts/ps-main/ps-icons.woff?l1la2n" as="font" crossorigin="anonymous">
+    <style type="text/css">@font-face { font-family: Roboto; src: url("chrome-extension://mcgbeeipkmelnpldkobichboakdfaeon/css/Roboto-Regular.ttf"); }</style><style type="text/css">.TnITTtw-fp-collapsed-button {
+    display: none;
+    position: fixed !important;
+    top: 16px !important;
+    right: 16px !important;
+}
+
+.TnITTtw-fp-collapsed-button:hover {
+    opacity: 1.0 !important;
+}
+
+.TnITTtw-mate-fp-bar {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, Ubuntu, sans-serif !important;
+    color: #000;
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 999;
+    background: rgb(255 255 255 / 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 16px;
+    border-radius: 11px;
+    box-shadow: 0 2px 10px rgb(0 0 0 / 25%);
+    width: 320px;
+    line-height: initial;
+}
+
+@-moz-document url-prefix() {
+    .TnITTtw-mate-fp-bar {
+        background: rgb(255 255 255 / 1.0);
+    }
+}
+
+.TnITTtw-mate-fp-bar.TnITTtw-dark-mode {
+    background: rgb(44, 44, 43);
+}
+
+.TnITTtw-hide-fp-bar {
+    width: 12px;
+    height: 12px;
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/regular-close-tt.png) !important;
+    background-size: 12px 12px;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    cursor: pointer;
+}
+
+.TnITTtw-hide-fp-bar:hover {
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/hover-close-tt.png) !important;
+}
+
+.TnITTtw-current-page-lang {
+    color: #6d6d72;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.TnITTtw-dark-mode .TnITTtw-current-page-lang {
+    color: #98989D;
+}
+
+.TnITTtw-fp-translate {
+    width: calc(100% - 73px) !important;
+    font-size: 14px !important;
+    text-transform: none !important;
+}
+
+.TnITTtw-fp-translate.TnITTtw-in-progress {
+    animation-name: funky-bg;
+    animation-duration: 10s;
+    animation-timing-function: ease-in;
+}
+
+.TnITTtw-fp-translate.TnITTtw-show-original {
+    width: calc(100% - 20px) !important;
+}
+
+@keyframes funky-bg {
+    from {
+        background-image: linear-gradient(145deg, #01EF92, #00D8FB),
+        linear-gradient(35deg, rgba(1, 239, 146, 0.25), rgba(0, 216, 251, 0.25)) !important;
+    }
+
+    to {
+        background-image: linear-gradient(90deg, #01EF92, #00D8FB),
+        linear-gradient(35deg, rgba(1, 239, 146, 0.25), rgba(0, 216, 251, 0.25)) !important;
+    }
+}
+
+.TnITTtw-change-language, .TnITTtw-stop-fp {
+    width: 38px;
+    height: 38px;
+    background-color: #EFEFF4;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px 16px;
+    border-radius: 11px;
+    display: inline-block;
+    vertical-align: top;
+    cursor: pointer;
+}
+
+.TnITTtw-change-language {
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/globe-earth.png) !important;
+}
+
+.TnITTtw-dark-mode .TnITTtw-change-language {
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/globe-earth-dark.png) !important;
+}
+
+.TnITTtw-stop-fp {
+    display: none;
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/regular-stt-stop.png) !important;
+    background-size: 12px 12px;
+}
+
+.TnITTtw-dark-mode .TnITTtw-change-language, .TnITTtw-dark-mode .TnITTtw-stop-fp {
+    background-color: #525251 !important;
+}
+
+.TnITTtw-change-language:hover, .TnITTtw-stop-fp:hover {
+    background-color: #F6F6F6;
+}
+
+.TnITTtw-change-language:active, .TnITTtw-stop-fp:active {
+    background-color: #E9E9E9;
+}
+
+.TnITTtw-dark-mode .TnITTtw-change-language:hover,
+.TnITTtw-dark-mode .TnITTtw-stop-fp:hover,
+.TnITTtw-dark-mode .TnITTtw-change-language:active,
+.TnITTtw-dark-mode .TnITTtw-stop-fp:active {
+    background-color: #767675;
+}
+
+#TnITTtw-always-translate {
+}
+
+.TnITTtw-fp-options input {
+    padding: initial;
+    width: auto;
+    border: initial;
+    box-shadow: initial;
+    line-height: initial;
+    height: auto;
+    display: initial;
+    position: initial;
+    appearance: auto;
+    top: initial;
+    cursor: pointer;
+    margin: 0;
+}
+
+.TnITTtw-fp-options input[readonly="readonly"] {
+    opacity: 0.5;
+}
+
+#TnITTtw-always-translate + label,
+#TnITTtw-never-translate-lang + label,
+#TnITTtw-never-translate-site + label {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, Ubuntu, sans-serif !important;
+    display: inline-block;
+    font-weight: 400;
+    font-size: 14px;
+    margin-left: 4px;
+    color: #000;
+    cursor: pointer;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 296px;
+    vertical-align: top;
+    line-height: initial;
+    letter-spacing: initial;
+    text-transform: initial;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+#TnITTtw-always-translate + label::before,
+#TnITTtw-never-translate-lang + label::before,
+#TnITTtw-never-translate-site + label::before,
+#TnITTtw-always-translate + label::after,
+#TnITTtw-never-translate-lang + label::after,
+#TnITTtw-never-translate-site + label::after  {
+    content: initial;
+} 
+
+.TnITTtw-always-translate-inner-label {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 252px;
+    vertical-align: top;
+    display: inline-block;
+}
+
+.TnITTtw-dark-mode #TnITTtw-always-translate + label,
+.TnITTtw-dark-mode #TnITTtw-never-translate-lang + label,
+.TnITTtw-dark-mode #TnITTtw-never-translate-site + label {
+    color: #FFF;
+}
+
+#TnITTtw-always-translate + label.TnITTtw-not-pro {
+    opacity: 0.5;
+}
+
+#TnITTtw-always-translate + label .TnITTtw-pro-label {
+    position: relative;
+    background: #000;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #FFF;
+    padding: 2px 5px;
+    border-radius: 4px;
+    margin-left: 10px;
+    top: -1px;
+    user-select: none;
+    -webkit-user-select: none;
+    display: inline;
+    font-weight: 500;
+}
+
+.TnITTtw-dark-mode #TnITTtw-always-translate + label .TnITTtw-pro-label {
+    background: #FFF;
+    color: #000;
+}
+
+.TnITTtw-inline-original-tooltip {
+    display: none;
+    position: absolute;
+    margin: 0px;
+    border: none;
+    padding: 16px;
+    color: rgb(0, 0, 0);
+    background-color: rgb(255 255 255 / 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 11px;
+    box-shadow: 0 2px 10px rgb(0 0 0 / 25%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, Ubuntu, sans-serif;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: normal;
+}
+
+.TnITTtw-dark-mode.TnITTtw-inline-original-tooltip {
+    background-color: rgb(0 0 0 / 0.915);
+    color: #FFF;
+}
+
+.TnITTtw-inline-original-tooltip .TnITTtw-close-original-tooltip {
+    width: 12px;
+    height: 12px;
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/regular-close-tt.png) !important;
+    background-size: 12px 12px;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    cursor: pointer;
+}
+
+.TnITTtw-inline-original-tooltip .TnITTtw-close-original-tooltip:hover {
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/hover-close-tt.png) !important;
+}
+
+.TnITTtw-inline-original-tooltip .TnITTtw-original-label {
+    margin: 0;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #6d6d72;
+    margin-bottom: 10px;
+}
+
+.TnITTtw-inline-original-tooltip.TnITTtw-dark-mode .TnITTtw-original-label {
+    color: #98989D;
+}
+
+.TnITTtw-inline-original-tooltip .TnITTtw-text-layout {
+    display: inline-block;
+    margin: 0;
+    font-size: 16px;
+    color: #000;
+}
+
+.TnITTtw-inline-original-tooltip.TnITTtw-dark-mode .TnITTtw-text-layout {
+    color: #FFF;
+}
+
+.TnITTtw-highlighted-for-original {
+    color: #0F0F5F;
+    background-color: #F0F0A0;
+}
+
+/* Dropdown scrollbars */
+
+#selVisibleScroll-1, #selVisibleScroll-2, #selVisibleScroll-3 {
+    overflow: hidden;
+    height: 259px;
+    width: 100%;
+    position: relative;
+}
+
+#sel-scrollbar-1, #sel-scrollbar-2, #sel-scrollbar-3 {
+    position: absolute;
+    width: 4px;
+    height: 259px;
+    left: 225px;
+}
+
+#sel-track-1, #sel-track-2, #sel-track-3 {
+    position: absolute;
+    top: 1px;
+    width: 4px;
+    height: calc(100% - 6px);
+}
+
+#sel-dragBar-1, #sel-dragBar-2, #sel-dragBar-3 {
+    position: absolute;
+    top: 1px;
+    width: 4px;
+    background: rgba(43, 43, 43, 0.5);
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.dark-mode #sel-dragBar-1, .dark-mode #sel-dragBar-2, .dark-mode #sel-dragBar-3 {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+#sel-dragBar-1:hover, #sel-dragBar-2:hover, #sel-dragBar-3:hover, 
+#sel-dragBar-1:active, #sel-dragBar-2:active, #sel-dragBar-3:active {
+    background: rgba(43, 43, 43, 0.675);
+}
+
+.dark-mode #sel-dragBar-1:hover,
+.dark-mode #sel-dragBar-2:hover,
+.dark-mode #sel-dragBar-3:hover,
+.dark-mode #sel-dragBar-1:active,
+.dark-mode #sel-dragBar-2:active,
+.dark-mode #sel-dragBar-3:active {
+    background: rgba(255, 255, 255, 0.675);
+}
+
+#sel-scrollbar-1, #sel-track-1, #sel-dragBar-1, 
+#sel-scrollbar-2, #sel-track-2, #sel-dragBar-2,
+#sel-scrollbar-3, #sel-track-3, #sel-dragBar-3 {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Spinner for when it's translating a page */
+
+.TnITTtw-cta-button-layout {
+    position: relative;
+    display: inline;
+}
+
+.TnITTtw-spinner {
+    display: none;
+    text-align: center;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    user-select: none;
+    -webkit-user-select: none;
+}
+  
+  @media screen and (max-width: 800px) {
+    .TnITTtw-spinner {
+      top: 28px;
+    }
+  }
+
+  .TnITTtw-spinner.in-text {
+    display: block;
+    background: transparent;
+    position: initial;
+  }
+
+  .TnITTtw-spinner.left {
+    text-align: left;
+  }
+  
+  .TnITTtw-spinner > div {
+    width: 12px;
+    height: 12px;
+    background-color: rgb(0, 71, 46);
+  
+    border-radius: 100%;
+    display: inline-block;
+    -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+    animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+  }
+
+  .TnITTtw-spinner.in-text > div {
+    background-color: #000;
+  }
+  
+  .TnITTtw-spinner .TnITTtw-bounce1 {
+    -webkit-animation-delay: -0.32s;
+    animation-delay: -0.32s;
+  }
+  
+  .TnITTtw-spinner .TnITTtw-bounce2 {
+    -webkit-animation-delay: -0.16s;
+    animation-delay: -0.16s;
+  }
+  
+  @-webkit-keyframes sk-bouncedelay {
+    0%, 80%, 100% { -webkit-transform: scale(0) }
+    40% { -webkit-transform: scale(1.0) }
+  }
+  
+  @keyframes sk-bouncedelay {
+    0%, 80%, 100% { 
+      -webkit-transform: scale(0);
+      transform: scale(0);
+    } 40% { 
+      -webkit-transform: scale(1.0);
+      transform: scale(1.0);
+    }
+  }</style><style type="text/css">/*
+ * contextMenu.js v 1.4.0
+ * Author: Sudhanshu Yadav
+ * s-yadav.github.com
+ * Copyright (c) 2013 Sudhanshu Yadav.
+ * Dual licensed under the MIT and GPL licenses
+**/
+
+.iw-contextMenu {
+    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.10) !important;
+    border: 1px solid #c8c7cc !important;
+    border-radius: 11px !important;
+    display: none;
+    z-index: 1000000132;
+    max-width: 300px !important;
+    width: auto !important;
+}
+
+.dark-mode .iw-contextMenu,
+.TnITTtw-dark-mode.iw-contextMenu,
+.TnITTtw-dark-mode .iw-contextMenu {
+    border-color: #747473 !important;
+}
+
+.iw-cm-menu {
+    background: #fff !important;
+    color: #000 !important;
+    margin: 0px !important;
+    padding: 0px !important;
+    overflow: visible !important;
+}
+
+.dark-mode .iw-cm-menu,
+.TnITTtw-dark-mode.iw-cm-menu,
+.TnITTtw-dark-mode .iw-cm-menu {
+    background: #525251 !important;
+    color: #FFF !important;
+}
+
+.iw-curMenu {
+}
+
+.iw-cm-menu li {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, Ubuntu, sans-serif !important;
+    list-style: none !important;
+    padding: 10px !important;
+    padding-right: 20px !important;
+    border-bottom: 1px solid #c8c7cc !important;
+    font-weight: 400 !important;
+    cursor: pointer !important;
+    position: relative !important;
+    font-size: 14px !important;
+    margin: 0 !important;
+    line-height: inherit !important;
+    border-radius: 0 !important;
+    display: block !important;
+}
+
+.dark-mode .iw-cm-menu li, .TnITTtw-dark-mode .iw-cm-menu li {
+    border-bottom-color: #747473 !important;
+}
+
+.iw-cm-menu li:first-child {
+    border-top-left-radius: 11px !important;
+    border-top-right-radius: 11px !important;
+}
+
+.iw-cm-menu li:last-child {
+    border-bottom-left-radius: 11px !important;
+    border-bottom-right-radius: 11px !important;
+    border-bottom: none !important;
+}
+
+.iw-mOverlay {
+    position: absolute !important;
+    width: 100% !important;
+    height: 100% !important;
+    top: 0px !important;
+    left: 0px !important;
+    background: #FFF !important;
+    opacity: .5 !important;
+}
+
+.iw-contextMenu li.iw-mDisable {
+    opacity: 0.3 !important;
+    cursor: default !important;
+}
+
+.iw-mSelected {
+    background-color: #F6F6F6 !important;
+}
+
+.dark-mode .iw-mSelected, .TnITTtw-dark-mode .iw-mSelected {
+    background-color: #676766 !important;
+}
+
+.iw-cm-arrow-right {
+    width: 0 !important;
+    height: 0 !important;
+    border-top: 5px solid transparent !important;
+    border-bottom: 5px solid transparent !important;
+    border-left: 5px solid #000 !important;
+    position: absolute !important;
+    right: 5px !important;
+    top: 50% !important;
+    margin-top: -5px !important;
+}
+
+.dark-mode .iw-cm-arrow-right, .TnITTtw-dark-mode .iw-cm-arrow-right {
+    border-left-color: #FFF !important;
+}
+
+.iw-mSelected > .iw-cm-arrow-right {
+}
+
+/*context menu css end */</style><style type="text/css">.ui_selector, .TnITTtw-ui_selector {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, Ubuntu, sans-serif;
+    display: inline-block;
+}
+
+.ui_selector .select, .TnITTtw-ui_selector .TnITTtw-select {
+    color: #000;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    border: 1px solid rgba(200, 199, 204, 0.5);
+    padding: 10px 15px;
+    width: 201px;
+    -webkit-user-select: none;
+    cursor: pointer;
+    border-radius: 11px;
+    display: inline-block;
+    background-image: -webkit-linear-gradient(top, #FAFAFA, #F6F6F6);
+    background-image: -moz-linear-gradient(top, #FAFAFA, #F6F6F6);
+    background-size: auto 48px;
+    background-position: 0px -11px;
+    box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.10);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.dark-mode .ui_selector .select, 
+.TnITTtw-dark-mode .TnITTtw-ui_selector .TnITTtw-select {
+    background-image: -webkit-linear-gradient(top, #4A4A49, #40403F);
+    background-image: -moz-linear-gradient(top, #4A4A49, #40403F);
+    color: #FFF;
+    border-color: #747473;
+}
+
+.ui_selector .select:hover,
+.TnITTtw-ui_selector .TnITTtw-select:hover {
+    color: #424242;
+    background-image: -webkit-linear-gradient(top, #FAFAFA, #FAFAFA);
+    background-image: -moz-linear-gradient(top, #FAFAFA, #FAFAFA);
+}
+
+.ui_selector .select:active,
+.TnITTtw-ui_selector .TnITTtw-select:active {
+    color: #6d6d72;
+    background-image: -webkit-linear-gradient(top, #F6F6F6, #F6F6F6);
+    background-image: -moz-linear-gradient(top, #F6F6F6, #F6F6F6);
+}
+
+.dark-mode .ui_selector .select:hover,
+.dark-mode .ui_selector .select:active,
+.TnITTtw-dark-mode .TnITTtw-ui_selector .TnITTtw-select:hover,
+.TnITTtw-dark-mode .TnITTtw-ui_selector .TnITTtw-select:active {
+    background-image: -webkit-linear-gradient(top, #4A4A49, #4A4A49);
+    background-image: -moz-linear-gradient(top, #4A4A49, #4A4A49);
+    color: #FFF;
+    border-color: #747473;
+}
+
+.ui_selector .select .detected-ico,
+.TnITTtw-ui_selector .TnITTtw-select .TnITTtw-detected-ico {
+    display: inline-block;
+}
+
+.ui_selector .active, .ui_selector .active:hover, .ui_selector .active:active,
+.TnITTtw-ui_selector .TnITTtw-active, .TnITTtw-ui_selector .TnITTtw-active:hover, .TnITTtw-ui_selector .TnITTtw-active:active {
+    box-shadow: 0 -1px 15px -10px rgba(0, 0, 0, 0.85) !important;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    background: #F3F3F3;
+}
+
+.sliding-text,
+.TnITTtw-sliding-text {
+    position: relative;
+}
+
+.ui_selector .options,
+.TnITTtw-ui_selector .TnITTtw-options {
+    margin-left: 0px;
+    margin-top: -4px;
+    background: #fff;
+    border: 1px solid rgba(200, 199, 204, 0.5);
+    width: 231px;
+    overflow: hidden;
+    max-height: 313px;
+    position: absolute;
+    font-size: 12px;
+    box-shadow: 0 2px 10px rgb(0 0 0 / 25%);
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    display: none;
+}
+
+.ui_selector .options.standalone,
+.TnITTtw-ui_selector .TnITTtw-options.TnITTtw-standalone {
+    border-radius: 11px;
+    margin-top: 16px;
+}
+
+/* for now, it can only be on the top */
+.ui_selector .options-arrow,
+.TnITTtw-ui_selector .TnITTtw-options-arrow {
+    display: none;
+    position: absolute;
+    width: 32px !important;
+    height: 18px !important;
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/tt-dropdown-arrow.png);
+    background-size: 32px 18px;
+    transform: rotate(180deg);
+    margin-top: -1px;
+}
+
+.dark-mode .ui_selector .options-arrow,
+.TnITTtw-dark-mode .TnITTtw-ui_selector .TnITTtw-options-arrow {
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/tt-dropdown-arrow-dark.png);
+}
+
+.dark-mode .ui_selector .options,
+.TnITTtw-dark-mode .TnITTtw-ui_selector .TnITTtw-options {
+    background: #525251;
+}
+
+.ui_selector .options ul,
+.TnITTtw-ui_selector .TnITTtw-options ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 232px;
+}
+
+.ui_selector .options ul li,
+.TnITTtw-ui_selector .TnITTtw-options ul li {
+    padding: 10px 0px;
+    -webkit-user-select: none;
+    text-align: center;
+    font-size: 17px;
+    -webkit-transition: all 600ms cubic-bezier(0.23, 1, 0.32, 1);
+    margin: 0 10px;
+    border-radius: 6px;
+    position: relative;
+}
+
+.dark-mode .options ul li,
+.TnITTtw-dark-mode .TnITTtw-options ul li {
+    color: #fff;
+}
+
+.ui_selector .options ul li:last-child,
+.TnITTtw-ui_selector .TnITTtw-options ul li:last-child {
+    margin-bottom: 16px;
+}
+
+.ui_selector .options ul li.option:first-child,
+.ui_selector .options ul li.option_selected:first-child,
+.TnITTtw-ui_selector .TnITTtw-options ul li.TnITTtw-option:first-child,
+.TnITTtw-ui_selector .TnITTtw-options ul li.TnITTtw-option_selected:first-child {
+    margin-top: 16px;
+}
+
+.ui_selector .options ul li.whenHover,
+.TnITTtw-ui_selector .TnITTtw-options ul li.TnITTtw-whenHover {
+    cursor: pointer;
+    background: #f3f3f3;
+    text-align: center;
+}
+
+.dark-mode .ui_selector .options ul li.whenHover,
+.TnITTtw-dark-mode .TnITTtw-ui_selector .TnITTtw-options ul li.TnITTtw-whenHover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.ui_selector .options ul li.option_selected,
+.TnITTtw-ui_selector .TnITTtw-options ul li.TnITTtw-option_selected {
+    cursor: pointer;
+    background-image: linear-gradient(145deg, #01EF92, #00D8FB),
+    linear-gradient(35deg, rgba(1, 239, 146, 0.25), rgba(0, 216, 251, 0.25)) !important;
+    color: #fff;
+    font-weight: 600;
+}
+
+.ui_selector .options ul .group,
+.ui_selector .options ul .group:hover,
+.ui_selector .options ul .group.whenHover,
+.TnITTtw-ui_selector .TnITTtw-options ul .TnITTtw-group,
+.TnITTtw-ui_selector .TnITTtw-options ul .TnITTtw-group:hover,
+.TnITTtw-ui_selector .TnITTtw-options ul .TnITTtw-group.whenHover {
+    padding: 16px 10px;
+    color: #8e8e93;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    text-align: center;
+    cursor: default;
+    background: #FFF;
+}
+
+.dark-mode .ui_selector .options ul .group,
+.dark-mode .ui_selector .options ul .group:hover,
+.dark-mode .ui_selector .options ul .group.whenHover,
+.TnITTtw-dark-mode .TnITTtw-ui_selector .TnITTtw-options ul .TnITTtw-group,
+.TnITTtw-dark-mode .TnITTtw-ui_selector .TnITTtw-options ul .TnITTtw-group:hover,
+.TnITTtw-dark-mode .TnITTtw-ui_selector .TnITTtw-options ul .TnITTtw-group.TnITTtw-whenHover {
+    color: #98989D;
+    background: #525251;
+}
+
+.group-element,
+.TnITTtw-group-element {
+    width: 153px;
+}
+
+.options .dd-search,
+.TnITTtw-options .TnITTtw-dd-search {
+    border-bottom: 1px solid rgba(200, 199, 204, 0.5);
+}
+
+.dark-mode .options .dd-search,
+.TnITTtw-dark-mode .TnITTtw-options .TnITTtw-dd-search {
+    border-bottom-color: #747473;
+}
+
+.dd-search .dd-input,
+.TnITTtw-dd-search .TnITTtw-dd-input {
+    padding: 16px;
+    padding-left: calc(16px * 3);
+    width: 168px;
+    border: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, Ubuntu, sans-serif;
+    text-align: left;
+    color: #000;
+    font-size: 17px;
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/searchfield-icon.png);
+    background-position: 16px;
+    background-size: 16px;
+    background-repeat: no-repeat;
+    margin: 0;
+    height: auto;
+}
+
+.dark-mode .dd-search .dd-input,
+.TnITTtw-dark-mode .TnITTtw-dd-search .TnITTtw-dd-input {
+    color: #FFF;
+    background-color: #525251;
+}
+
+.dd-search .dd-input:focus,
+.TnITTtw-dd-search .TnITTtw-dd-input:focus {
+    -webkit-transition: all 275ms cubic-bezier(0.23, 1, 0.32, 1);
+    outline: none;
+    text-align: left;
+}
+
+.dd-input::-webkit-input-placeholder,
+.TnITTtw-dd-input::-webkit-input-placeholder {
+    color: #8e8e93;
+}
+
+.search-failed-plaque,
+.TnITTtw-search-failed-plaque {
+    text-align: center;
+    padding: 20px;
+    color: #8e8e93;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.dark-mode .search-failed-plaque,
+.TnITTtw-dark-mode .TnITTtw-search-failed-plaque {
+    color: #98989D;
+}
+
+.rm-recent,
+.TnITTtw-rm-recent {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/regular-lang-remove.png);
+    background-size: 10px 10px;
+    top: 15px;
+    right: 10px;
+}
+
+.rm-recent:hover,
+.TnITTtw-rm-recent:hover {
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/hover-lang-remove.png);
+}
+
+.rm-recent:active,
+.TnITTtw-rm-recent:active {
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/down-lang-remove.png);
+}
+
+.option_selected .rm-recent,
+.TnITTtw-option_selected .TnITTtw-rm-recent {
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/down-active-lang-remove.png);
+}
+
+.option_selected .rm-recent:hover,
+.TnITTtw-option_selected .TnITTtw-rm-recent:hover {
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/hover-active-lang-remove.png);
+}
+
+.option_selected .rm-recent:active,
+.TnITTtw-option_selected .TnITTtw-rm-recent:active {
+    background-image: url(chrome-extension://ihmgiclibbndffejedjimfjmfoabpcke/res/images/ui/down-active-lang-remove.png);
+}
+
+.TnITTtw-hidden {
+    display: none;
+}</style><style type="text/css">@-webkit-keyframes load4 {
+    0%,
+    100% {
+        box-shadow: 0 -3em 0 0.2em, 2em -2em 0 0em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 0;
+    }
+    12.5% {
+        box-shadow: 0 -3em 0 0, 2em -2em 0 0.2em, 3em 0 0 0, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 -1em;
+    }
+    25% {
+        box-shadow: 0 -3em 0 -0.5em, 2em -2em 0 0, 3em 0 0 0.2em, 2em 2em 0 0, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 -1em;
+    }
+    37.5% {
+        box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0em 0 0, 2em 2em 0 0.2em, 0 3em 0 0em, -2em 2em 0 -1em, -3em 0em 0 -1em, -2em -2em 0 -1em;
+    }
+    50% {
+        box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 0em, 0 3em 0 0.2em, -2em 2em 0 0, -3em 0em 0 -1em, -2em -2em 0 -1em;
+    }
+    62.5% {
+        box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 0, -2em 2em 0 0.2em, -3em 0 0 0, -2em -2em 0 -1em;
+    }
+    75% {
+        box-shadow: 0em -3em 0 -1em, 2em -2em 0 -1em, 3em 0em 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0.2em, -2em -2em 0 0;
+    }
+    87.5% {
+        box-shadow: 0em -3em 0 0, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0, -2em -2em 0 0.2em;
+    }
+}
+
+@keyframes load4 {
+    0%,
+    100% {
+        box-shadow: 0 -3em 0 0.2em, 2em -2em 0 0em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 0;
+    }
+    12.5% {
+        box-shadow: 0 -3em 0 0, 2em -2em 0 0.2em, 3em 0 0 0, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 -1em;
+    }
+    25% {
+        box-shadow: 0 -3em 0 -0.5em, 2em -2em 0 0, 3em 0 0 0.2em, 2em 2em 0 0, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 -1em;
+    }
+    37.5% {
+        box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0em 0 0, 2em 2em 0 0.2em, 0 3em 0 0em, -2em 2em 0 -1em, -3em 0em 0 -1em, -2em -2em 0 -1em;
+    }
+    50% {
+        box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 0em, 0 3em 0 0.2em, -2em 2em 0 0, -3em 0em 0 -1em, -2em -2em 0 -1em;
+    }
+    62.5% {
+        box-shadow: 0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 0, -2em 2em 0 0.2em, -3em 0 0 0, -2em -2em 0 -1em;
+    }
+    75% {
+        box-shadow: 0em -3em 0 -1em, 2em -2em 0 -1em, 3em 0em 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0.2em, -2em -2em 0 0;
+    }
+    87.5% {
+        box-shadow: 0em -3em 0 0, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0, -2em -2em 0 0.2em;
+    }
+}</style><style type="text/css">/* This is not a zero-length file! */</style></head>
+    <body class="theme-">
+        
+
+
+        <header class="page-header" id="top">
+            <div class="container">
+    <a class="logo" href="https://portswigger.net/"></a>
+    <div class="header-right">
+        <div class="login-buttons">
+                <a class="button-orange-small" href="https://portswigger.net/users">Login</a>
+        </div>
+
+
+    <input type="checkbox" id="hamburger-mobile" class="hamburger-input-mobile">
+    <input type="radio" id="hamburger-desktop" class="hamburger-input-desktop" name="mega-nav-input">
+    <div class="hamburger-menu-mobile">
+        <label class="hamburger-menu-label header-hidden" for="hamburger-mobile" data-ga-click-label="hamburger-mobile">
+            <span class="hamburger-layers"></span>
+        </label>
+    </div>
+    <div class="mega-nav">
+        <input type="radio" id="mega-nav-close" class="mega-nav-input-close" name="mega-nav-input">
+        <input type="radio" id="mega-nav-label-1" class="mega-nav-input-1" name="mega-nav-input">
+        <input type="radio" id="mega-nav-label-2" class="mega-nav-input-2" name="mega-nav-input">
+        <input type="radio" id="mega-nav-label-6" class="mega-nav-input-6" name="mega-nav-input">
+        <input type="radio" id="mega-nav-label-7" class="mega-nav-input-7" name="mega-nav-input">
+
+        <label for="mega-nav-close" class="mega-nav-close"></label>
+
+        <label class="mega-nav-label mega-nav-label-1" for="mega-nav-label-1" data-ga-click-label="products">
+            <span class="mega-nav-text">Products</span>
+            <span class="icon-arrow-head-down"></span>
+        </label>
+        <label class="mega-nav-label mega-nav-label-2" for="mega-nav-label-2" data-ga-click-label="solutions">
+            <span class="mega-nav-text">Solutions</span>
+            <span class="icon-arrow-head-down"></span>
+        </label>
+        <a data-ga-click-label="research" class="mega-nav-link" href="https://portswigger.net/research"><span class="mega-nav-text">Research</span></a>
+        <a data-ga-click-label="academy" class="mega-nav-link" href="https://portswigger.net/web-security"><span class="mega-nav-text">Academy</span></a>
+        <a data-ga-click-label="dailyswig" class="mega-nav-link" href="https://portswigger.net/daily-swig"><span class="mega-nav-text">Daily Swig</span></a>
+        <label data-ga-click-label="support" class="mega-nav-label mega-nav-label-6" for="mega-nav-label-6">
+            <span class="mega-nav-text">Support</span>
+            <span class="icon-arrow-head-down"></span>
+        </label>
+
+        <label class="mega-nav-label mega-nav-label-7 header-hidden" for="mega-nav-label-7" data-ga-click-label="company">
+            <span class="mega-nav-text">Company</span>
+            <span class="icon-arrow-head-down"></span>
+        </label>
+        <div class="hamburger-menu-desktop">
+            <label class="hamburger-menu-label header-show" for="hamburger-desktop" data-ga-click-label="hamburger-desktop">
+                <span class="hamburger-layers"></span>
+            </label>
+            <div>
+                <a class="hamburger-menu-desktop-link hamburger-menu-desktop-link-1" href="https://portswigger.net/customers" data-ga-click-label="customers"><span class="mega-nav-text">Customers</span></a>
+                <a class="hamburger-menu-desktop-link hamburger-menu-desktop-link-2" href="https://portswigger.net/burp/how-to-buy" data-ga-click-label="how-to-buy"><span class="mega-nav-text">How to buy</span></a>
+                <a class="hamburger-menu-desktop-link hamburger-menu-desktop-link-3" href="https://portswigger.net/about" data-ga-click-label="about"><span class="mega-nav-text">About</span></a>
+                <a class="hamburger-menu-desktop-link hamburger-menu-desktop-link-4" href="https://portswigger.net/blog" data-ga-click-label="blog"><span class="mega-nav-text">Blog</span></a>
+                <a class="hamburger-menu-desktop-link hamburger-menu-desktop-link-5" href="https://portswigger.net/careers" data-ga-click-label="careers"><span class="mega-nav-text">Careers</span></a>
+                <a class="hamburger-menu-desktop-link hamburger-menu-desktop-link-6" href="https://portswigger.net/legal" data-ga-click-label="legal"><span class="mega-nav-text">Legal</span></a>
+                <a class="hamburger-menu-desktop-link hamburger-menu-desktop-link-7" href="https://portswigger.net/contact" data-ga-click-label="contact"><span class="mega-nav-text">Contact</span></a>
+                <a class="hamburger-menu-desktop-link hamburger-menu-desktop-link-8" href="https://portswigger.net/support/reseller-faqs" data-ga-click-label="contact"><span class="mega-nav-text">Resellers</span></a>
+            </div>
+        </div>
+
+        <a class="mega-nav-link header-hidden" href="https://portswigger.net/users/youraccount" data-ga-click-label="login-mobile"><span class="mega-nav-text">My account</span></a>
+        <a class="hamburger-menu-link hamburger-menu-link-1" href="https://portswigger.net/customers" data-ga-click-label="customers"><span class="mega-nav-text">Customers</span></a>
+        <a class="hamburger-menu-link hamburger-menu-link-2" href="https://portswigger.net/burp/how-to-buy" data-ga-click-label="how-to-buy"><span class="mega-nav-text">How to buy</span></a>
+        <a class="hamburger-menu-link hamburger-menu-link-3" href="https://portswigger.net/about" data-ga-click-label="about"><span class="mega-nav-text">About</span></a>
+        <a class="hamburger-menu-link hamburger-menu-link-4" href="https://portswigger.net/blog" data-ga-click-label="blog"><span class="mega-nav-text">Blog</span></a>
+        <a class="hamburger-menu-link hamburger-menu-link-5" href="https://portswigger.net/careers" data-ga-click-label="careers"><span class="mega-nav-text">Careers</span></a>
+        <a class="hamburger-menu-link hamburger-menu-link-6" href="https://portswigger.net/legal" data-ga-click-label="legal"><span class="mega-nav-text">Legal</span></a>
+        <a class="hamburger-menu-link hamburger-menu-link-7" href="https://portswigger.net/contact" data-ga-click-label="contact"><span class="mega-nav-text">Contact</span></a>
+        <a class="hamburger-menu-link hamburger-menu-link-8" href="https://portswigger.net/support/reseller-faqs" data-ga-click-label="contact"><span class="mega-nav-text">Resellers</span></a>
+
+        <div class="mega-nav-container">
+
+            <div class="mega-nav-content mega-nav-content-1">
+                <div class="section-white-medium-no-padding">
+                    <div class="container-columns-66-percent-right">
+                        <div>
+                            <a href="https://portswigger.net/burp/enterprise" class="link-block-white" data-ga-click-label="product-enterprise">
+                                <img src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/enterprise.svg" alt="Burp Suite Enterprise Edition">
+                                <span><strong>Burp Suite Enterprise Edition</strong></span>
+                                <span>The enterprise-enabled dynamic web vulnerability scanner.</span>
+                            </a>
+
+                            <a href="https://portswigger.net/burp/pro" class="link-block-white" data-ga-click-label="product-pro">
+                                <img src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/professional.svg" alt="Burp Suite Professional">
+                                <span><strong>Burp Suite Professional</strong></span>
+                                <span>The world's #1 web penetration testing toolkit.</span>
+                            </a>
+
+                            <a href="https://portswigger.net/burp/communitydownload" class="link-block-white" data-ga-click-label="product-community">
+                                <img src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/community.svg" alt="Burp Suite Community Edition">
+                                <span><strong>Burp Suite Community Edition</strong></span>
+                                <span>The best manual tools to start web security testing.</span>
+                            </a>
+
+                            <a href="https://portswigger.net/burp" class="chevron-after" data-ga-click-label="products-all">View all product editions</a>
+                        </div>
+
+                        <div>
+                            <div class="container-cards-lists-white">
+                                <a href="https://portswigger.net/burp/how-to-buy" data-ga-click-label="feature-how-to-buy-burp-suite">
+                                    <p><strong>How to buy Burp Suite</strong></p>
+                                    <p>Information on ordering, pricing, and more.</p>
+                                    <img src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/tailored-quote.png" alt="Burp Suite Professional vs Burp Suite Enterprise Edition">
+                                </a>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="mega-nav-content mega-nav-content-2">
+                <div class="section-white-medium-no-padding">
+                    <div class="container-columns-66-percent-right">
+                        <div>
+                            <div class="container-columns">
+                                <a href="https://portswigger.net/solutions" class="link-block-white" data-ga-click-label="solutions-application-testing">
+                                    <span><strong>Application Security Testing</strong></span>
+                                    <span>See how our software enables the world to secure the web.</span>
+                                </a>
+                                <a href="https://portswigger.net/solutions/devsecops" class="link-block-white" data-ga-click-label="solutions-devsecops">
+                                    <span><strong>DevSecOps</strong></span>
+                                    <span>Catch critical bugs; ship more secure software, more quickly.</span>
+                                </a>
+
+                                <a href="https://portswigger.net/solutions/penetration-testing" class="link-block-white" data-ga-click-label="solutions-penetration-testing">
+                                    <span><strong>Penetration Testing</strong></span>
+                                    <span>Accelerate penetration testing - find more bugs, more quickly.</span>
+                                </a>
+                                <a href="https://portswigger.net/solutions/automated-security-testing" class="link-block-white" data-ga-click-label="solutions-automated-penetration-testing">
+                                    <span><strong>Automated Scanning</strong></span>
+                                    <span>Scale dynamic scanning. Reduce risk. Save time/money.</span>
+                                </a>
+
+                                <a href="https://portswigger.net/solutions/bug-bounty-hunting" class="link-block-white" data-ga-click-label="solutions-bug-bounty-software">
+                                    <span><strong>Bug Bounty Hunting</strong></span>
+                                    <span>Level up your hacking and earn more bug bounties.</span>
+                                </a>
+                                <a href="https://portswigger.net/solutions/compliance" class="link-block-white" data-ga-click-label="solutions-compliance">
+                                    <span><strong>Compliance</strong></span>
+                                    <span>Enhance security monitoring to comply with confidence.</span>
+                                </a>
+                            </div>
+                            <a href="https://portswigger.net/solutions" class="chevron-after" data-ga-click-label="solutions-all">View all solutions</a>
+                        </div>
+
+                        <div>
+                            <div class="container-cards-lists-white">
+                                <a href="https://portswigger.net/burp/enterprise/resources/enterprise-edition-vs-professional" data-ga-click-label="feature-product-burp-comparison">
+                                    <p><strong>Product comparison</strong></p>
+                                    <p>What's the difference between Pro and Enterprise Edition?</p>
+                                    <img src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/burp-suite.jpg" alt="Burp Suite Professional vs Burp Suite Enterprise Edition">
+                                </a>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="mega-nav-content mega-nav-content-6">
+                <div class="section-white-medium-no-padding">
+                    <div class="container-columns-66-percent-right">
+                        <div>
+                            <div class="container-columns">
+                                <a href="https://portswigger.net/support" class="link-block-white" data-ga-click-label="support-center">
+                                    <span><strong>Support Center</strong></span>
+                                    <span>Get help and advice from our experts on all things Burp.</span>
+                                </a>
+                                <a href="https://portswigger.net/burp/documentation" class="link-block-white" data-ga-click-label="support-documentation">
+                                    <span><strong>Documentation</strong></span>
+                                    <span>Tutorials and guides for Burp Suite.</span>
+                                </a>
+                                <a href="https://portswigger.net/burp/documentation/desktop/getting-started" class="link-block-white" data-ga-click-label="support-get-started-professional">
+                                    <span><strong>Get Started - Professional</strong></span>
+                                    <span>Get started with Burp Suite Professional.</span>
+                                </a>
+                                <a href="https://portswigger.net/burp/documentation/enterprise/getting-started" class="link-block-white" data-ga-click-label="support-get-started-enterprise">
+                                    <span><strong>Get Started - Enterprise</strong></span>
+                                    <span>Get started with Burp Suite Enterprise Edition.</span>
+                                </a>
+                                <a href="https://forum.portswigger.net/" class="link-block-white" data-ga-click-label="support-user-forum">
+                                    <span><strong>User Forum</strong></span>
+                                    <span>Get your questions answered in the User Forum.</span>
+                                </a>
+                                <a href="https://portswigger.net/burp/releases" class="link-block-white" data-ga-click-label="support-releases">
+                                    <span><strong>Downloads</strong></span>
+                                    <span>Download the latest version of Burp Suite.</span>
+                                </a>
+                            </div>
+                            <a href="https://portswigger.net/support" class="chevron-after" data-ga-click-label="support-all">Visit the Support Center</a>
+                        </div>
+
+                        <div>
+                            <div class="container-cards-lists-white">
+                                <a href="https://portswigger.net/burp/releases" data-ga-click-label="feature-burp-software-downloads">
+                                    <p><strong>Downloads</strong></p>
+                                    <p>Download the latest version of Burp Suite.</p>
+                                    <img src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/latest-burp-suite-software-download.jpg" alt="The latest version of Burp Suite software for download">
+                                </a>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    </div>
+</div>
+        </header>
+        
+
+
+
+
+            <nav class="navigation-top">
+                <input type="checkbox" id="nav-main-enterprise">
+                <label for="nav-main-enterprise">
+                    <span>Academy home</span>
+                    <span class="icon-arrow-head-down"></span>
+                </label>
+                <ul>
+                    <li><a href="https://portswigger.net/web-security/index.html">Academy Home</a></li>
+                    <li><a href="https://portswigger.net/web-security/learning-path/index.html">Learning Path</a></li>
+                    <li>
+                        <input type="checkbox" id="nav-main-academy-topics">
+                        <label for="nav-main-academy-topics">
+                            <span>Latest Topics</span>
+                            <span class="icon-arrow-head-down"></span>
+                        </label>
+                        <div>
+                            <a href="https://portswigger.net/web-security/request-smuggling/browser/index.html">Browser-powered request smuggling</a>
+                            <a href="https://portswigger.net/web-security/jwt/index.html">JWT attacks</a>
+                            <a href="https://portswigger.net/web-security/file-upload/index.html">File upload vulnerabilities</a>
+                            <a href="https://portswigger.net/web-security/oauth/index.html">OAuth authentication</a>
+                            <a href="https://portswigger.net/web-security/all-materials/index.html">View all topics</a>
+                        </div>
+                    </li>
+                    <li><a href="https://portswigger.net/web-security/all-labs">All Labs</a></li>
+                    <li>
+                        <input type="checkbox" id="nav-main-academy-hall-of-fame">
+                        <label for="nav-main-academy-hall-of-fame">
+                            <span>Hall of Fame</span>
+                            <span class="icon-arrow-head-down"></span>
+                        </label>
+                        <div>
+                            <a href="https://portswigger.net/web-security/hall-of-fame">Leaderboard</a>
+                            <a href="https://portswigger.net/web-security/getting-started/kamil-vavra/index.html">Interview - Kamil Vavra</a>
+                            <a href="https://portswigger.net/web-security/getting-started/johnny-villarreal/index.html">Interview - Johnny Villarreal</a>
+                            <a href="https://portswigger.net/web-security/getting-started/andres-rauschecker/index.html">Interview - Andres Rauschecker</a>
+                        </div>
+                    </li>
+                    <li><a href="https://portswigger.net/web-security/getting-started/index.html">Getting Started Guide</a></li>
+                    <li>
+                        <input type="checkbox" id="nav-main-academy-certification">
+                        <label for="nav-main-academy-certification">
+                             <span>Get Certified</span>
+                             <span class="icon-arrow-head-down"></span>
+                        </label>
+                        <div>
+                             <a href="https://portswigger.net/web-security/certification/index.html">Get certified</a>
+                             <a href="https://portswigger.net/web-security/certification/how-to-prepare/index.html">How to prepare</a>
+                             <a href="https://portswigger.net/web-security/certification/how-it-works/index.html">How it works</a>
+                             <a href="https://portswigger.net/web-security/certification/practice-exam/index.html">Practice exam</a>
+                             <a href="https://portswigger.net/web-security/certification/exam-hints-and-guidance/index.html">Exam hints and guidance</a>
+                             <a href="https://portswigger.net/web-security/certification/how-it-works/index.html#what-the-exam-involves">What the exam involves</a>
+                             <a href="https://portswigger.net/web-security/certification/frequently-asked-questions/index.html">FAQs</a>
+                             <a href="https://portswigger.net/web-security/certification#validate-your-certification">Validate your certification</a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        <ol class="container ps-breadcrumbs" itemscope="" itemtype="http://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem"><a itemscope="" itemtype="http://schema.org/Thing" itemprop="item" href="https://portswigger.net/web-security"><span itemprop="name">Web Security Academy</span></a><meta itemprop="position" content="1"></li><li itemprop="itemListElement" itemscope="" itemtype="http://schema.org/ListItem"><a itemscope="" itemtype="http://schema.org/Thing" itemprop="item" href="https://portswigger.net/web-security/sql-injection"><span itemprop="name">SQL injection</span></a><meta itemprop="position" content="2"></li></ol>        <section class="maincontainer">
+                <div class="container is-flex">
+                    <div class="maincol">
+                        
+    <h1>SQL injection</h1>
+
+
+<p>
+            In this section, we'll explain what SQL injection (SQLi) is, describe some common examples, explain how to find and exploit various kinds of SQL injection vulnerabilities, and summarize how to prevent SQL injection.
+        </p>
+        <img alt="SQL injection" src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/sql-injection.svg">
+        <div class="component-links">
+            <h4>Labs</h4>
+            <p>
+                If you're already familiar with the basic concepts behind SQLi vulnerabilities and just want to practice exploiting them on some realistic, deliberately vulnerable targets, you can access all of the labs in this topic from the link below.
+            </p>
+            <a href="https://portswigger.net/web-security/all-labs#sql-injection">View all SQL injection labs</a>
+        </div>
+        <h2 id="what-is-sql-injection-sqli">What is SQL injection (SQLi)?</h2>
+        <div class="container-columns-auto">
+            <div>
+                <p cms-metadescription="">
+                    SQL injection (SQLi) is a web security vulnerability that allows an attacker to interfere with the queries that an application makes to its database. It generally allows an attacker to view data that they are not normally able to retrieve. This might include data belonging to other users, or any other data that the application itself is able to access. In many cases, an attacker can modify or delete this data, causing persistent changes to the application's content or behavior.
+                </p>
+                <p>
+                    In some situations, an attacker can escalate an SQL injection attack to compromise the underlying server or other back-end infrastructure, or perform a denial-of-service attack.
+                </p>
+            </div>
+        </div>
+		<div class="youtube-wrapper text-center"><iframe src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/wX6tszfgYp4.html" allowfullscreen=""></iframe></div>
+		<h2 id="what-is-the-impact-of-a-successful-sql-injection-attack">What is the impact of a successful SQL injection attack?</h2>
+		<p>
+		    A successful SQL injection attack can result in unauthorized access to sensitive data, such as passwords, credit card details, or personal user information. Many high-profile data breaches in recent years have been the result of SQL injection attacks, leading to reputational damage and regulatory fines. In some cases, an attacker can obtain a persistent backdoor into an organization's systems, leading to a long-term compromise that can go unnoticed for an extended period.
+	    </p>
+		<h2 id="sql-injection-examples">SQL injection examples</h2>
+        <p>
+            There are a wide variety of SQL injection vulnerabilities, attacks, and techniques, which arise in different situations. Some common SQL injection examples include:
+        </p>
+        <ul>
+            <li><a href="https://portswigger.net/web-security/sql-injection#retrieving-hidden-data"> Retrieving hidden data</a>, where you can modify an SQL query to return additional results.</li>
+            <li><a href="https://portswigger.net/web-security/sql-injection#subverting-application-logic">Subverting application logic</a>, where you can change a query to interfere with the application's logic.</li>
+            <li><a href="https://portswigger.net/web-security/sql-injection/union-attacks">UNION attacks</a>, where you can retrieve data from different database tables.</li>
+            <li><a href="https://portswigger.net/web-security/sql-injection/examining-the-database">Examining the database</a>, where you can extract information about the version and structure of the database.</li>
+            <li><a href="https://portswigger.net/web-security/sql-injection/blind">Blind SQL injection</a>, where the results of a query you control are not returned in the application's responses.</li>
+        </ul>
+        <h2 id="retrieving-hidden-data">Retrieving hidden data</h2>
+        <p>
+            Consider a shopping application that displays products in different categories. When the user clicks on the Gifts category, their browser requests the URL:
+        </p>
+        <code class="code-scrollable">https://insecure-website.com/products?category=Gifts</code>
+        <p>
+            This causes the application to make an SQL query to retrieve details of the relevant products from the database:
+        </p>
+        <code class="code-scrollable">SELECT * FROM products WHERE category = 'Gifts' AND released = 1</code>
+        <p>
+            This SQL query asks the database to return:
+        </p>
+        <ul>
+            <li>
+                all details (*)
+            </li>
+            <li>
+                from the products table
+            </li>
+            <li>
+                where the category is Gifts
+            </li>
+            <li>
+                and released is 1.
+            </li>
+        </ul>
+        <p>
+            The restriction <code>released = 1</code> is being used to hide products that are not released. For unreleased products, presumably <code>released = 0</code>.
+        </p>
+        <p>
+            The application doesn't implement any defenses against SQL injection attacks, so an attacker can construct an attack like:
+        </p>
+        <code class="code-scrollable">https://insecure-website.com/products?category=Gifts'--</code>
+        <p>
+            This results in the SQL query:
+        </p>
+        <code class="code-scrollable">SELECT * FROM products WHERE category = 'Gifts'--' AND released = 1</code>
+        <p>
+            The key thing here is that the double-dash sequence <code>--</code> is a comment indicator in SQL, and means that the rest of the query is interpreted as a comment. This effectively removes the remainder of the query, so it no longer includes <code>AND released = 1</code>. This means that all products are displayed, including unreleased products.
+        </p>
+        <p>
+            Going further, an attacker can cause the application to display all the products in any category, including categories that they don't know about:
+        </p>
+        <code class="code-scrollable">https://insecure-website.com/products?category=Gifts'+OR+1=1--</code>
+        <p>
+            This results in the SQL query:
+        </p>
+        <code class="code-scrollable">SELECT * FROM products WHERE category = 'Gifts' OR 1=1--' AND released = 1</code>
+        <p>
+            The modified query will return all items where either the category is Gifts, or 1 is equal to 1. Since <code>1=1</code> is always true, the query will return all items.
+        </p>
+        
+
+    <div class="widgetcontainer-lab-link ">
+        <span>LAB</span>
+        <div class="flex-columns">
+            <span class="lab-level-display__apprentice">APPRENTICE</span>
+            <a href="https://portswigger.net/web-security/sql-injection/lab-retrieve-hidden-data">SQL injection vulnerability in WHERE clause allowing retrieval of hidden data</a>
+        </div>
+    </div>
+
+        <h2 id="subverting-application-logic">Subverting application logic</h2>
+        <p>
+            Consider an application that lets users log in with a username and password. If a user submits the username <code>wiener</code> and the password <code>bluecheese</code>, the application checks the credentials by performing the following SQL query:
+        </p>
+        <code class="code-scrollable">SELECT * FROM users WHERE username = 'wiener' AND password = 'bluecheese'</code>
+        <p>
+            If the query returns the details of a user, then the login is successful. Otherwise, it is rejected.
+        </p>
+        <p>
+            Here, an attacker can log in as any user without a password simply by using the SQL comment sequence <code>--</code> to remove the password check from the <code>WHERE</code> clause of the query. For example, submitting the username <code>administrator'--</code> and a blank password results in the following query:
+        </p>
+        <code class="code-scrollable">SELECT * FROM users WHERE username = 'administrator'--' AND password = ''</code>
+        <p>
+            This query returns the user whose username is <code>administrator</code> and successfully logs the attacker in as that user.
+        </p>
+        
+
+    <div class="widgetcontainer-lab-link ">
+        <span>LAB</span>
+        <div class="flex-columns">
+            <span class="lab-level-display__apprentice">APPRENTICE</span>
+            <a href="https://portswigger.net/web-security/sql-injection/lab-login-bypass">SQL injection vulnerability allowing login bypass</a>
+        </div>
+    </div>
+
+        <h2 id="retrieving-data-from-other-database-tables">Retrieving data from other database tables</h2>
+        <p>
+            In cases where the results of an SQL query are returned within the application's responses, an attacker can leverage an SQL injection vulnerability to retrieve data from other tables within the database. This is done using the <code>UNION</code> keyword, which lets you execute an additional <code>SELECT</code> query and append the results to the original query.
+        </p>
+        <p>
+            For example, if an application executes the following query containing the user input "Gifts":
+        </p>
+        <code class="code-scrollable">SELECT name, description FROM products WHERE category = 'Gifts'</code>
+        <p>
+            then an attacker can submit the input:
+        </p>
+        <code class="code-scrollable">' UNION SELECT username, password FROM users--</code>
+        <p>
+            This will cause the application to return all usernames and passwords along with the names and descriptions of products.
+        </p>
+        <div class="component-links">
+            <h4>Read more</h4>
+            <a href="https://portswigger.net/web-security/sql-injection/union-attacks">SQL injection UNION attacks</a>
+        </div>
+        <h2 id="examining-the-database">Examining the database</h2>
+        <p>
+            Following initial identification of an SQL injection vulnerability, it is generally useful to obtain some information about the database itself. This information can often pave the way for further exploitation.
+        </p>
+        <p>
+            You can query the version details for the database. The way that this is done depends on the database type, so you can infer the database type from whichever technique works. For example, on Oracle you can execute:
+        </p>
+        <code class="code-scrollable">SELECT * FROM v$version</code>
+        <p>
+            You can also determine what database tables exist, and which columns they contain. For example, on most databases you can execute the following query to list the tables:
+        </p>
+        <code class="code-scrollable">SELECT * FROM information_schema.tables</code>
+        <div class="component-links">
+            <h4>Read more</h4>
+            <a href="https://portswigger.net/web-security/sql-injection/examining-the-database">Examining the database in SQL injection attacks</a><a href="https://portswigger.net/web-security/sql-injection/cheat-sheet">SQL injection cheat sheet</a>
+        </div>
+        <h2 id="blind-sql-injection-vulnerabilities">Blind SQL injection vulnerabilities</h2>
+        <p>
+            Many instances of SQL injection are blind vulnerabilities. This means that the application does not return the results of the SQL query or the details of any database errors within its responses. Blind vulnerabilities can still be exploited to access unauthorized data, but the techniques involved are generally more complicated and difficult to perform.
+        </p>
+        <p>
+            Depending on the nature of the vulnerability and the database involved, the following techniques can be used to exploit blind SQL injection vulnerabilities:
+        </p>
+        <ul>
+            <li>
+                You can change the logic of the query to trigger a detectable difference in the application's response depending on the truth of a single condition. This might involve injecting a new condition into some Boolean logic, or conditionally triggering an error such as a divide-by-zero.
+            </li>
+            <li>
+                You can conditionally trigger a time delay in the processing of the query, allowing you to infer the truth of the condition based on the time that the application takes to respond.
+            </li>
+            <li>
+                You can trigger an out-of-band network interaction, using <a href="https://portswigger.net/burp/application-security-testing/oast">OAST</a> techniques. This technique is extremely powerful and works in situations where the other techniques do not. Often, you can directly exfiltrate data via the out-of-band channel, for example by placing the data into a DNS lookup for a domain that you control.
+            </li>
+        </ul>
+        <div class="component-links">
+            <h4>Read more</h4>
+            <a href="https://portswigger.net/web-security/sql-injection/blind">Blind SQL injection</a>
+        </div>
+        <h2 id="how-to-detect-sql-injection-vulnerabilities">How to detect SQL injection vulnerabilities</h2>
+        <p>
+            The majority of SQL injection vulnerabilities can be found quickly and reliably using Burp Suite's <a href="https://portswigger.net/burp/vulnerability-scanner">web vulnerability scanner</a>.
+        </p>
+        <p>
+            SQL injection can be detected manually by using a systematic set of tests against every entry point in the application. This typically involves:
+        </p>
+        <ul>
+            <li>
+                Submitting the single quote character <code>'</code> and looking for errors or other anomalies.
+            </li>
+            <li>
+                Submitting some SQL-specific syntax that evaluates to the base (original) value of the entry point, and to a different value, and looking for systematic differences in the resulting application responses.
+            </li>
+            <li>
+                Submitting Boolean conditions such as <code>OR 1=1</code> and <code>OR 1=2</code>, and looking for differences in the application's responses.
+            </li>
+            <li>
+                Submitting payloads designed to trigger time delays when executed within an SQL query, and looking for differences in the time taken to respond.
+            </li>
+            <li>
+                Submitting OAST payloads designed to trigger an out-of-band network interaction when executed within an SQL query, and monitoring for any resulting interactions.
+            </li>
+        </ul>
+        <h2 id="sql-injection-in-different-parts-of-the-query">SQL injection in different parts of the query</h2>
+        <p>
+            Most SQL injection vulnerabilities arise within the <code>WHERE</code> clause of a <code>SELECT</code> query. This type of SQL injection is generally well-understood by experienced testers.
+        </p>
+        <p>
+            But SQL injection vulnerabilities can in principle occur at any location within the query, and within different query types. The most common other locations where SQL injection arises are:
+        </p>
+        <ul>
+            <li>
+                In <code>UPDATE</code> statements, within the updated values or the <code>WHERE</code> clause.
+            </li>
+            <li>
+                In <code>INSERT</code> statements, within the inserted values.
+            </li>
+            <li>
+                In <code>SELECT</code> statements, within the table or column name.
+            </li>
+            <li>
+                In <code>SELECT</code> statements, within the <code>ORDER BY</code> clause.
+            </li>
+        </ul>
+        <h2 id="sql-injection-in-different-contexts">SQL injection in different contexts</h2>
+        <p>
+            In all of the labs so far, you've used the query string to inject your malicious SQL payload. However, it's important to note that you can perform SQL injection attacks using any controllable input that is processed as a SQL query by the application. For example, some websites take input in JSON or XML format and use this to query the database.
+        </p>
+        <p>
+            These different formats may even provide alternative ways for you to <a href="https://portswigger.net/web-security/reference/obfuscating-attacks-using-encodings#obfuscation-via-xml-encoding">obfuscate attacks</a> that are otherwise blocked due to WAFs and other defense mechanisms. Weak implementations often just look for common SQL injection keywords within the request, so you may be able to bypass these filters by simply encoding or escaping characters in the prohibited keywords. For example, the following XML-based SQL injection uses an XML escape sequence to encode the <code>S</code> character in <code>SELECT</code>:
+        </p>
+        <code class="code-scrollable">&lt;stockCheck&gt;
+    &lt;productId&gt;
+        123
+    &lt;/productId&gt;
+    &lt;storeId&gt;
+        999 &amp;#x53;ELECT * FROM information_schema.tables
+    &lt;/storeId&gt;
+&lt;/stockCheck&gt;</code>
+        <p>
+            This will be decoded server-side before being passed to the SQL interpreter.
+        </p>
+        
+
+    <div class="widgetcontainer-lab-link ">
+        <span>LAB</span>
+        <div class="flex-columns">
+            <span class="lab-level-display__practitioner">PRACTITIONER</span>
+            <a href="https://portswigger.net/web-security/sql-injection/lab-sql-injection-with-filter-bypass-via-xml-encoding">SQL injection with filter bypass via XML encoding</a>
+        </div>
+    </div>
+
+        <h2 id="second-order-sql-injection">Second-order SQL injection</h2>
+        <p>
+            First-order SQL injection arises where the application takes user input from an HTTP request and, in the course of processing that request, incorporates the input into an SQL query in an unsafe way.
+        </p>
+        <p>
+            In second-order SQL injection (also known as stored SQL injection), the application takes user input from an HTTP request and stores it for future use. This is usually done by placing the input into a database, but no vulnerability arises at the point where the data is stored. Later, when handling a different HTTP request, the application retrieves the stored data and incorporates it into an SQL query in an unsafe way.
+        </p>
+        <img alt="Second-order SQL injection" src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/second-order-sql-injection.svg">
+        <p>
+            Second-order SQL injection often arises in situations where developers are aware of SQL injection vulnerabilities, and so safely handle the initial placement of the input into the database. When the data is later processed, it is deemed to be safe, since it was previously placed into the database safely. At this point, the data is handled in an unsafe way, because the developer wrongly deems it to be trusted.
+        </p>
+        <h2 id="database-specific-factors">Database-specific factors</h2>
+        <p>
+            Some core features of the SQL language are implemented in the same way across popular database platforms, and so many ways of detecting and exploiting SQL injection vulnerabilities work identically on different types of database.
+        </p>
+        <p>
+            However, there are also many differences between common databases. These mean that some techniques for detecting and exploiting SQL injection work differently on different platforms. For example:
+        </p>
+        <ul>
+            <li>
+                Syntax for string concatenation.
+            </li>
+            <li>
+                Comments.
+            </li>
+            <li>
+                Batched (or stacked) queries.
+            </li>
+            <li>
+                Platform-specific APIs.
+            </li>
+            <li>
+                Error messages.
+            </li>
+        </ul>
+        <div class="component-links">
+            <h4>Read more</h4>
+            <a href="https://portswigger.net/web-security/sql-injection/cheat-sheet">SQL injection cheat sheet</a>
+        </div>
+        <h2 id="how-to-prevent-sql-injection">How to prevent SQL injection</h2>
+        <p>
+            Most instances of SQL injection can be prevented by using parameterized queries (also known as prepared statements) instead of string concatenation within the query.
+        </p>
+        <p>
+            The following code is vulnerable to SQL injection because the user input is concatenated directly into the query:
+        </p>
+        <code class="code-scrollable">String query = "SELECT * FROM products WHERE category = '"+ input + "'";
+Statement statement = connection.createStatement();
+ResultSet resultSet = statement.executeQuery(query);</code>
+        <p>
+            This code can be easily rewritten in a way that prevents the user input from interfering with the query structure:
+        </p>
+        <code class="code-scrollable">PreparedStatement statement = connection.prepareStatement("SELECT * FROM products WHERE category = ?");
+statement.setString(1, input);
+ResultSet resultSet = statement.executeQuery();</code>
+        <p>
+            Parameterized queries can be used for any situation where untrusted input appears as data within the query, including the <code>WHERE</code> clause and values in an <code>INSERT</code> or <code>UPDATE</code> statement. They can't be used to handle untrusted input in other parts of the query, such as table or column names, or the <code>ORDER BY</code> clause. Application functionality that places untrusted data into those parts of the query will need to take a different approach, such as white-listing permitted input values, or using different logic to deliver the required behavior.
+        </p>
+        <p>
+            For a parameterized query to be effective in preventing SQL injection, the string that is used in the query must always be a hard-coded constant, and must never contain any variable data from any origin. Do not be tempted to decide case-by-case whether an item of data is trusted, and continue using string concatenation within the query for cases that are considered safe. It is all too easy to make mistakes about the possible origin of data, or for changes in other code to violate assumptions about what data is tainted.
+        </p>
+        <div class="component-links">
+            <h4>Read more</h4>
+            <a href="https://portswigger.net/burp/vulnerability-scanner">Find SQL injection vulnerabilities using Burp Suite's web vulnerability scanner</a>
+        </div>
+
+
+                    </div>
+                    <div class="rightcol rightcol-boxes">
+                        
+	    
+<input class="hidden" id="trackerpopup" type="checkbox">
+<div class="widgetcontainer-box is-twobtns academy-account-status pin-to-bottom" id="AcademyAccountStatusWidget">
+        <p class="hidden-when-collapsed">Want to track your progress and have a more personalized learning experience? (It's free!)</p>
+        <div class="flex-center">
+            <a class="btn" href="https://portswigger.net/users/register">Sign up</a>
+            <a class="btn" href="https://portswigger.net/users?returnurl=%2fweb-security%2fsql-injection">Login</a>
+        </div>
+</div>
+
+
+        
+
+        <div class="widgetcontainer-box is-linklist">
+            <h4>In this topic</h4>
+            <a href="https://portswigger.net/web-security/sql-injection">SQL injection</a>
+            <a href="https://portswigger.net/web-security/sql-injection/union-attacks">UNION attacks</a>
+            <a href="https://portswigger.net/web-security/sql-injection/examining-the-database">Examining the database</a>
+            <a href="https://portswigger.net/web-security/sql-injection/blind">Blind SQL injection</a>
+            <a href="https://portswigger.net/web-security/sql-injection/cheat-sheet">SQL injection cheat sheet</a>
+        </div>
+        <div class="widgetcontainer-box is-linklist">
+            <h4>All topics</h4>
+            <a href="https://portswigger.net/web-security/sql-injection">SQL injection</a>
+            <a href="https://portswigger.net/web-security/cross-site-scripting">XSS</a>
+            <a href="https://portswigger.net/web-security/csrf">CSRF</a>
+            <a href="https://portswigger.net/web-security/clickjacking">Clickjacking</a>
+            <a href="https://portswigger.net/web-security/dom-based">DOM-based</a>
+            <a href="https://portswigger.net/web-security/cors">CORS</a>
+            <a href="https://portswigger.net/web-security/xxe">XXE</a>
+            <a href="https://portswigger.net/web-security/ssrf">SSRF</a>
+            <a href="https://portswigger.net/web-security/request-smuggling">Request smuggling</a>
+            <a href="https://portswigger.net/web-security/os-command-injection">Command injection</a>
+            <a href="https://portswigger.net/web-security/server-side-template-injection">Server-side template injection</a>
+            <a href="https://portswigger.net/web-security/deserialization">Insecure deserialization</a>
+            <a href="https://portswigger.net/web-security/file-path-traversal">Directory traversal</a>
+            <a href="https://portswigger.net/web-security/access-control">Access control</a>
+            <a href="https://portswigger.net/web-security/authentication">Authentication</a>
+            <a href="https://portswigger.net/web-security/oauth">OAuth authentication</a>
+            <a href="https://portswigger.net/web-security/logic-flaws">Business logic vulnerabilities</a>
+            <a href="https://portswigger.net/web-security/web-cache-poisoning">Web cache poisoning</a>
+            <a href="https://portswigger.net/web-security/host-header">HTTP Host header attacks</a>
+            <a href="https://portswigger.net/web-security/websockets">WebSockets</a>
+            <a href="https://portswigger.net/web-security/information-disclosure">Information disclosure</a>
+            <a href="https://portswigger.net/web-security/file-upload">File upload vulnerabilities</a>
+            <a href="https://portswigger.net/web-security/jwt">JWT attacks</a>
+        </div>
+        <div class="widget-orange">
+            <img alt="Try Burp Suite for Free" src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/burp-suite-icon.svg">
+            <h4>Find SQL injection vulnerabilities using Burp Suite</h4>
+            <a class="button-white" href="https://portswigger.net/burp">Try for free</a>
+        </div>
+	
+                    </div>
+                </div>
+        </section>
+
+
+        
+            <div class="widget-tile">
+                <div class="container">
+                    <h3 class="text-center charcoal">Stories from the Daily Swig about SQL injection</h3>
+                    <noscript>
+                        <div class="noscript-warning">This page requires JavaScript for an enhanced user experience.</div>
+                    </noscript>
+                    <div class="widget-tile-container has-1rows margin-top-m">
+
+
+<a href="https://portswigger.net/daily-swig/vendor-disputes-seriousness-of-firewall-plugin-rce-flaw" class="tile-container onecolumn widget-tile size0 style1 textstyle2" data-backgroundcolorid="0" style="background-image: url(&quot;/cms/images/37/ec/f81b-tile-pfsense-firewall-1x1.png&quot;); background-color: rgb(255, 255, 255); opacity: 0.9;">
+    
+<h3 class="tile-text1 notext2">
+Vendor disputes seriousness of firewall plugin RCE</h3>
+    
+<span class="tile-date">08 September 2022</span>
+    
+<span class="tile-text1-alt">Vendor disputes seriousness of firewall plugin RCE</span>
+        
+        <span class="tile-text2-alt">pfSense and sensibility</span>
+
+</a>
+
+<a href="https://portswigger.net/daily-swig/log4shell-legacy-patching-times-plummet-for-most-critical-vulnerabilities-report" class="tile-container onecolumn widget-tile size0 style1 textstyle6" data-backgroundcolorid="0" style="background-image: url(&quot;/cms/images/d5/b8/6e1b-tile-trustwave_report_1x1.jpg&quot;); background-color: rgb(255, 255, 255); opacity: 0.9;">
+    
+<h3 class="tile-text1 ">
+        <span class="tile-text-container">Log4Shell legacy?</span>
+</h3>
+
+
+    <span class="tile-text2">
+Patching times plummet for most critical vulnerabilities – report    </span>
+    
+<span class="tile-date">30 August 2022</span>
+    
+<span class="tile-text1-alt">Log4Shell legacy?</span>
+        
+        <span class="tile-text2-alt">Patching times plummet for most critical vulnerabilities – report</span>
+
+</a>
+
+<a href="https://portswigger.net/daily-swig/graph-based-javascript-bug-scanner-discovers-more-than-100-zero-day-vulnerabilities-in-node-js-libraries" class="tile-container onecolumn widget-tile size0 style1 textstyle4" data-backgroundcolorid="0" style="background-image: linear-gradient(rgba(50, 77, 92, 0.3), rgba(50, 77, 92, 0.3)), url(&quot;/cms/images/d4/f8/836f-tile-220830-nodejs-scanner-2x1.jpg&quot;); background-color: rgb(255, 255, 255); opacity: 0.9;">
+    
+<h3 class="tile-text1 ">
+        <span class="tile-text-container">Introducing ODGen</span>
+</h3>
+
+
+    <span class="tile-text2">
+            <span class="tile-text-container">Graph-based JavaScript bug scanner discovers more than 100 zero-day vulnerabilities in Node.js libraries</span>
+    </span>
+    
+<span class="tile-date">30 August 2022</span>
+    
+<span class="tile-text1-alt">Introducing ODGen</span>
+        
+        <span class="tile-text2-alt">Graph-based JavaScript bug scanner discovers more than 100 zero-day vulnerabilities in Node.js libraries</span>
+
+</a>
+
+<a href="https://portswigger.net/daily-swig/bug-bounty-radar-the-latest-bug-bounty-programs-for-august-2022" class="tile-container onecolumn widget-tile size0 style1 textstyle4" data-backgroundcolorid="0" style="background-image: url(&quot;/cms/images/6c/99/cb78-tile-bug-bounty-radar-2021-1x1-pink.jpg&quot;); background-color: rgb(255, 255, 255); opacity: 0.9;">
+    
+<h3 class="tile-text1 ">
+        <span class="tile-text-container">Bug Bounty Radar</span>
+</h3>
+
+
+    <span class="tile-text2">
+            <span class="tile-text-container">The latest bug bounty programs for August 2022</span>
+    </span>
+    
+<span class="tile-date">29 July 2022</span>
+    
+<span class="tile-text1-alt">Bug Bounty Radar</span>
+        
+        <span class="tile-text2-alt">The latest bug bounty programs for August 2022</span>
+
+</a>                    </div>
+                </div>
+            </div>
+
+        <div class="section-full-width theme-community-6 text-center">
+            <h2>Register for free to track your learning progress</h2>
+            <div class="container-columns-vertically-centered">
+                <div class="text-right">
+                    <img alt="The benefits of working through PortSwigger&#39;s Web Security Academy" src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/academy.png">
+                </div>
+                <div class="text-left">
+                    <ul class="unordered-list-vertical-ticks-small">
+                        <li><p>Practise exploiting vulnerabilities on realistic targets.</p></li>
+                        <li><p>Record your progression from Apprentice to Expert.</p></li>
+                        <li><p>See where you rank in our Hall of Fame.</p></li>
+                    </ul>
+                    
+<form action="https://portswigger.net/users/register" class="text-left" id="RegistrationWidget-B41C699451302BFFEE895C34FDAD425D" method="post"><input type="hidden" name="RequestVerificationToken" value="560DD74B2C5B3913C452CBF64D4BDA8B6E6054D974D2A827AC6CADDFA075DB8B46C2CE929905E1B861FC4B1595BB3C9B472114AB153A89D4CA014E3D5721FE28">        <div class="form-small disable-no-recaptcha">
+            <div class="font-small-error hidden">
+                <span class="icon-alert-white"></span>
+                <span class="font-small-error-text"></span>
+            </div>
+            <label>
+                <input name="EmailAddress" placeholder="Enter your email" type="email">
+                <button class="button-orange" type="button">
+                    <span>REGISTER</span>
+                </button>
+            </label>
+        </div>
+    <div id="Recaptcha-B41C699451302BFFEE895C34FDAD425D" class="recaptcha-div">
+            <div class="recaptcha-inner">
+                <div class="hidden" id="NoRecaptcha-B41C699451302BFFEE895C34FDAD425D">
+                    
+
+    <div class="notify-inline no-padding-bottom  error">
+        <div class="notify-logo icon-error"></div>
+        <div class="notify-message">
+            As we use reCAPTCHA, you need to be able to access Google's servers to use this function.
+        </div>
+    </div>
+
+                </div>
+
+                <input id="RecaptchaToken-B41C699451302BFFEE895C34FDAD425D" name="RecaptchaToken" type="hidden" value="">
+                <input type="hidden" id="RecaptchaClientSecret-B41C699451302BFFEE895C34FDAD425D" value="6LfgVpcUAAAAAMLiC7gC5kn_9oQizGINumO8VgHm">
+                <input type="hidden" id="RecaptchaV2ClientSecret-B41C699451302BFFEE895C34FDAD425D" value="6LeQHpwUAAAAAJ4LAI9AKvqARvxAiMo1EezetJ6V">
+                <div id="RecaptchaRenderLocation-B41C699451302BFFEE895C34FDAD425D" class="grecaptcha-v2-box"></div>
+            </div>
+            <script nonce="">
+              var recaptchaClientUrl = "https://www.google.com/recaptcha/api.js?render=";
+            </script>
+        <span class="Warning field-validation-valid" data-valmsg-for="RecaptchaToken" data-valmsg-replace="true"></span>
+    </div>
+</form>    <sup>
+        Already got an account?
+        <a href="https://portswigger.net/users">Login here</a>
+    </sup>
+    <script src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/register.js.tải xuống" nonce=""></script>
+
+                </div>
+            </div>
+        </div>
+    
+
+    <script src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/staticcms.js.tải xuống" nonce=""></script>
+
+
+        
+    <footer class="wrapper">
+        <div class="container">
+            <div>
+                <p>Burp Suite</p>
+                <a href="https://portswigger.net/burp/vulnerability-scanner">Web vulnerability scanner</a>
+                <a href="https://portswigger.net/burp">Burp Suite Editions</a>
+                <a href="https://portswigger.net/burp/releases">Release Notes</a>
+            </div>
+            <div>
+                <p>Vulnerabilities</p>
+                <a href="https://portswigger.net/web-security/cross-site-scripting">Cross-site scripting (XSS)</a>
+                <a href="https://portswigger.net/web-security/sql-injection">SQL injection</a>
+                <a href="https://portswigger.net/web-security/csrf">Cross-site request forgery</a>
+                <a href="https://portswigger.net/web-security/xxe">XML external entity injection</a>
+                <a href="https://portswigger.net/web-security/file-path-traversal">Directory traversal</a>
+                <a href="https://portswigger.net/web-security/ssrf">Server-side request forgery</a>
+            </div>
+            <div>
+                <p>Customers</p>
+                <a href="https://portswigger.net/organizations">Organizations</a>
+                <a href="https://portswigger.net/testers">Testers</a>
+                <a href="https://portswigger.net/developers">Developers</a>
+            </div>
+            <div>
+                <p>Company</p>
+                <a href="https://portswigger.net/about">About</a>
+                <a href="https://portswigger.net/news">PortSwigger News</a>
+                <a href="https://portswigger.net/careers">Careers</a>
+                <a href="https://portswigger.net/about/contact">Contact</a>
+                <a href="https://portswigger.net/legal">Legal</a>
+                <a href="https://portswigger.net/privacy">Privacy Notice</a>
+            </div>
+            <div>
+                <p>Insights</p>
+                <a href="https://portswigger.net/web-security">Web Security Academy</a>
+                <a href="https://portswigger.net/blog">Blog</a>
+                <a href="https://portswigger.net/research">Research</a>
+                <a href="https://portswigger.net/daily-swig">The Daily Swig</a>
+            </div>
+            <div>
+                <a href="https://portswigger.net/"><img src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/portswigger-logo.svg" alt="PortSwigger Logo" class="footer-logo"></a>
+                <a class="button-outline-blue-small camelcase" href="https://twitter.com/Burp_Suite" rel="noreferrer"><span class="icon-twitter"></span>  Follow us</a>
+                <p class="grey">© 2022 PortSwigger Ltd.</p>
+            </div>
+        </div>
+    </footer>
+    <a href="https://portswigger.net/web-security/sql-injection#top" class="back-to-top allow-for-pinned"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26"><polygon points="4.07 14.7 5.03 15.78 12.48 9.13 19.94 15.78 20.9 14.7 12.48 7.2 4.07 14.7" fill="#f63"></polygon><path d="M13,0A13,13,0,1,0,26,13,13,13,0,0,0,13,0Zm0,24.56A11.56,11.56,0,1,1,24.56,13,11.58,11.58,0,0,1,13,24.56Z" fill="#f63"></path></svg></a>
+
+    
+<script id="RecaptchaScript" async="" src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/api.js.tải xuống"></script><textarea id="BFI_DATA" style="width: 1px; height: 1px; display: none;"></textarea><title> </title><div id="WidgetFloaterPanels" translate="no" style="display: none; text-align: left; direction: ltr; visibility: hidden;" class="LTRStyle"> <div id="WidgetFloater" style="display: none" onmouseover="Microsoft.Translator.OnMouseOverFloater()" onmouseout="Microsoft.Translator.OnMouseOutFloater()"> <div id="WidgetLogoPanel"> <span id="WidgetTranslateWithSpan"><span>TRANSLATE with </span><img id="FloaterLogo"></span> <span id="WidgetCloseButton" title="Exit Translation" onclick="Microsoft.Translator.FloaterOnClose()">x</span></div> <div id="LanguageMenuPanel"> <div class="DDStyle_outer"><input name="LanguageMenu_svid" type="text" id="LanguageMenu_svid" style="display:none;" autocomplete="on" value="en" onclick="this.select()"> <input name="LanguageMenu_textid" type="text" id="LanguageMenu_textid" style="display:none;" autocomplete="on" onclick="this.select()"> <span onselectstart="return false" tabindex="0" class="DDStyle" id="__LanguageMenu_header" onclick="return LanguageMenu &amp;&amp; !LanguageMenu.Show(&#39;__LanguageMenu_popup&#39;, event);" onkeydown="return LanguageMenu &amp;&amp; !LanguageMenu.Show(&#39;__LanguageMenu_popup&#39;, event);">English</span> <div style="position:relative;text-align:left;left:0;"><div style="position:absolute;width:;left:0px;"><div class="DDStyle" style="display:none;" id="__LanguageMenu_popup"> <table id="LanguageMenu" border="0"> <tbody><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;ar&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#ar">Arabic</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;he&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#he">Hebrew</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;pl&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#pl">Polish</a></td> </tr><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;bg&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#bg">Bulgarian</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;hi&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#hi">Hindi</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;pt&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#pt">Portuguese</a></td> </tr><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;ca&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#ca">Catalan</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;mww&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#mww">Hmong Daw</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;ro&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#ro">Romanian</a></td> </tr><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;zh-CHS&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#zh-CHS">Chinese Simplified</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;hu&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#hu">Hungarian</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;ru&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#ru">Russian</a></td> </tr><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;zh-CHT&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#zh-CHT">Chinese Traditional</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;id&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#id">Indonesian</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;sk&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#sk">Slovak</a></td> </tr><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;cs&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#cs">Czech</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;it&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#it">Italian</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;sl&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#sl">Slovenian</a></td> </tr><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;da&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#da">Danish</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;ja&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#ja">Japanese</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;es&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#es">Spanish</a></td> </tr><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;nl&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#nl">Dutch</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;tlh&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#tlh">Klingon</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;sv&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#sv">Swedish</a></td> </tr><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;en&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#en">English</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;ko&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#ko">Korean</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;th&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#th">Thai</a></td> </tr><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;et&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#et">Estonian</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;lv&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#lv">Latvian</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;tr&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#tr">Turkish</a></td> </tr><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;fi&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#fi">Finnish</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;lt&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#lt">Lithuanian</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;uk&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#uk">Ukrainian</a></td> </tr><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;fr&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#fr">French</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;ms&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#ms">Malay</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;ur&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#ur">Urdu</a></td> </tr><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;de&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#de">German</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;mt&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#mt">Maltese</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;vi&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#vi">Vietnamese</a></td> </tr><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;el&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#el">Greek</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;no&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#no">Norwegian</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;cy&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#cy">Welsh</a></td> </tr><tr> <td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;ht&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#ht">Haitian Creole</a></td><td><a tabindex="-1" onclick="return LanguageMenu.onclick(&#39;fa&#39;);" ondragstart="LanguageMenu.ondragstart(event);" href="https://portswigger.net/web-security/sql-injection#fa">Persian</a></td><td></td> </tr> </tbody></table> <img alt="" style="height:7px;width:17px;border-width:0px;left:20px;"> </div></div></div></div> <script type="text/javascript"> var LanguageMenu; var LanguageMenu_keys=["ar","bg","ca","zh-CHS","zh-CHT","cs","da","nl","en","et","fi","fr","de","el","ht","he","hi","mww","hu","id","it","ja","tlh","ko","lv","lt","ms","mt","no","fa","pl","pt","ro","ru","sk","sl","es","sv","th","tr","uk","ur","vi","cy"]; var LanguageMenu_values=["Arabic","Bulgarian","Catalan","Chinese Simplified","Chinese Traditional","Czech","Danish","Dutch","English","Estonian","Finnish","French","German","Greek","Haitian Creole","Hebrew","Hindi","Hmong Daw","Hungarian","Indonesian","Italian","Japanese","Klingon","Korean","Latvian","Lithuanian","Malay","Maltese","Norwegian","Persian","Polish","Portuguese","Romanian","Russian","Slovak","Slovenian","Spanish","Swedish","Thai","Turkish","Ukrainian","Urdu","Vietnamese","Welsh"]; var LanguageMenu_callback=function(){ }; var LanguageMenu_popupid='__LanguageMenu_popup'; </script> </div> <div id="CTFLinksPanel"> <span id="ExternalLinksPanel"><a id="HelpLink" title="Help" target="_blank" href="https://go.microsoft.com/?linkid=9722454"> <img id="HelpImg"></a> <a id="EmbedLink" href="javascript:Microsoft.Translator.FloaterShowEmbed()" title="Get this widget for your own site"> <img id="EmbedImg"></a> <a id="ShareLink" title="Share translated page with friends" href="javascript:Microsoft.Translator.FloaterShowSharePanel()"> <img id="ShareImg"></a> </span> </div> <div id="FloaterProgressBar"> <span id="ProgressFill"></span> </div> </div> <div id="WidgetFloaterCollapsed" style="display: none" onmouseover="Microsoft.Translator.OnMouseOverFloater()"> <span>TRANSLATE with </span><img id="CollapsedLogoImg"></div> <div id="FloaterSharePanel" style="display: none"> <div id="ShareTextDiv"> <span id="ShareTextSpan"> COPY THE URL BELOW </span> </div> <div id="ShareTextboxDiv"> <input name="ShareTextbox" type="text" id="ShareTextbox" readonly="readonly" onclick="this.select()"> <!--a id="TwitterLink" title="Share on Twitter"> <img id="TwitterImg" /></a> <a-- id="FacebookLink" title="Share on Facebook"> <img id="FacebookImg" /></a--> <a id="EmailLink" title="Email this translation"> <img id="EmailImg"></a> </div> <div id="ShareFooter"> <span id="ShareHelpSpan"><a id="ShareHelpLink"> <img id="ShareHelpImg"></a></span> <span id="ShareBackSpan"><a id="ShareBack" href="javascript:Microsoft.Translator.FloaterOnShareBackClick()" title="Back To Translation"> Back</a></span> </div> <input name="EmailSubject" type="hidden" id="EmailSubject" value="Check out this page in {0} translated from {1}"> <input name="EmailBody" type="hidden" id="EmailBody" value="Translated: {0}%0d%0aOriginal: {1}%0d%0a%0d%0aAutomatic translation powered by Microsoft® Translator%0d%0ahttp://www.bing.com/translator?ref=MSTWidget"> <input type="hidden" id="ShareHelpText" value="This link allows visitors to launch this page and automatically translate it to {0}."> </div> <div id="FloaterEmbed" style="display: none"> <div id="EmbedTextDiv"> <span id="EmbedTextSpan">EMBED THE SNIPPET BELOW IN YOUR SITE</span> <a id="EmbedHelpLink" title="Copy this code and place it into your HTML."> <img id="EmbedHelpImg"></a> </div> <div id="EmbedTextboxDiv"> <input name="EmbedSnippetTextBox" type="text" id="EmbedSnippetTextBox" readonly="readonly" value="&lt;div id=&#39;MicrosoftTranslatorWidget&#39; class=&#39;Dark&#39; style=&#39;color:white;background-color:#555555&#39;&gt;&lt;/div&gt;&lt;script type=&#39;text/javascript&#39;&gt;setTimeout(function(){var s=document.createElement(&#39;script&#39;);s.type=&#39;text/javascript&#39;;s.charset=&#39;UTF-8&#39;;s.src=((location &amp;&amp; location.href &amp;&amp; location.href.indexOf(&#39;https&#39;) == 0)?&#39;https://ssl.microsofttranslator.com&#39;:&#39;http://www.microsofttranslator.com&#39;)+&#39;/ajax/v3/WidgetV3.ashx?siteData=ueOIGRSKkd965FeEGM5JtQ**&amp;ctf=true&amp;ui=true&amp;settings=manual&amp;from=en&#39;;var p=document.getElementsByTagName(&#39;head&#39;)[0]||document.documentElement;p.insertBefore(s,p.firstChild); },0);&lt;/script&gt;" onclick="this.select()"> </div> <div id="EmbedNoticeDiv"><span id="EmbedNoticeSpan">Enable collaborative features and customize widget: <a href="http://www.bing.com/widget/translator" target="_blank">Bing Webmaster Portal</a></span></div> <div id="EmbedFooterDiv"><span id="EmbedBackSpan"><a href="javascript:Microsoft.Translator.FloaterOnEmbedBackClick()" title="Back To Translation">Back</a></span></div> </div> <script type="text/javascript"> var intervalId = setInterval(function () { if (MtPopUpList) { LanguageMenu = new MtPopUpList(); var langMenu = document.getElementById(LanguageMenu_popupid); var origLangDiv = document.createElement("div"); origLangDiv.id = "OriginalLanguageDiv"; origLangDiv.innerHTML = "<span id='OriginalTextSpan'>ORIGINAL: </span><span id='OriginalLanguageSpan'></span>"; langMenu.appendChild(origLangDiv); LanguageMenu.Init('LanguageMenu', LanguageMenu_keys, LanguageMenu_values, LanguageMenu_callback, LanguageMenu_popupid); window["LanguageMenu"] = LanguageMenu; clearInterval(intervalId); } }, 1); </script> </div><div><div class="grecaptcha-badge" data-style="bottomright" style="width: 256px; height: 60px; display: block; transition: right 0.3s ease 0s; position: fixed; bottom: 14px; right: -186px; box-shadow: gray 0px 0px 5px; border-radius: 2px; overflow: hidden;"><div class="grecaptcha-logo"><iframe title="reCAPTCHA" src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/anchor.html" width="256" height="60" role="presentation" name="a-i4errfyeziqf" frameborder="0" scrolling="no" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation allow-modals allow-popups-to-escape-sandbox"></iframe></div><div class="grecaptcha-error"></div><textarea id="g-recaptcha-response-100000" name="g-recaptcha-response" class="g-recaptcha-response" style="width: 250px; height: 40px; border: 1px solid rgb(193, 193, 193); margin: 10px 25px; padding: 0px; resize: none; display: none;"></textarea></div><iframe style="display: none;" src="./What is SQL Injection_ Tutorial &amp; Examples _ Web Security Academy_files/saved_resource.html"></iframe></div><div class="TnITTtw-fp-collapsed-button" style="display: block;"></div><div class="TnITTtw-mate-fp-bar" translate="no" style="z-index: 1000; width: 0px; height: 0px; opacity: 0; display: none;">    <div class="TnITTtw-hide-fp-bar" style="display: none;"></div>    <div class="TnITTtw-current-page-lang" style="display: none;">This page is in English</div>    <div class="TnITTtw-cta-button-layout" style="display: none;">        <div class="TnITTtw-spinner">            <div class="TnITTtw-bounce1"></div>            <div class="TnITTtw-bounce2"></div>            <div class="TnITTtw-bounce3"></div>        </div>        <div class="TnITTtw-mw-button TnITTtw-fp-translate TnITTtw-high-cta" style="display: none;">Translate to Vietnamese</div>    </div>    <div class="TnITTtw-change-language TnITTtw-select" data-for-serial="3" style="display: none;"></div>    <div class="TnITTtw-stop-fp"></div>    <div class="TnITTtw-toggle-iphone-settings" style="display: none;"></div>    <div class="TnITTtw-ui_selector" style="display: none;">        <div class="TnITTtw-options-arrow"></div>        <div class="TnITTtw-options TnITTtw-opt-3 TnITTtw-standalone" data-serial="3" style="display: none; z-index: 998;">            <div class="TnITTtw-dd-search">                <input class="TnITTtw-dd-input" type="text" data-dir="to" placeholder="Search" data-width="NaN">            </div>            <div id="selVisibleScroll-3">                <div id="selEntireScroll-3">                    <div class="TnITTtw-inner-options-layout">                        <ul class="TnITTtw-list"><li class="lang-af TnITTtw-option" index="1"><span id="lang-af" val="af" class="lang-af">Afrikaans</span></li><li class="lang-sq TnITTtw-option" index="2"><span id="lang-sq" val="sq" class="lang-sq">Albanian</span></li><li class="lang-am TnITTtw-option" index="3"><span id="lang-am" val="am" class="lang-am">Amharic</span></li><li class="lang-ar TnITTtw-option" index="4"><span id="lang-ar" val="ar" class="lang-ar">Arabic</span></li><li class="lang-hy TnITTtw-option" index="5"><span id="lang-hy" val="hy" class="lang-hy">Armenian</span></li><li class="lang-az TnITTtw-option" index="6"><span id="lang-az" val="az" class="lang-az">Azerbaijani</span></li><li class="lang-bn TnITTtw-option" index="7"><span id="lang-bn" val="bn" class="lang-bn">Bengali</span></li><li class="lang-bg TnITTtw-option" index="8"><span id="lang-bg" val="bg" class="lang-bg">Bulgarian</span></li><li class="lang-ca TnITTtw-option" index="9"><span id="lang-ca" val="ca" class="lang-ca">Catalan</span></li><li class="lang-hr TnITTtw-option" index="10"><span id="lang-hr" val="hr" class="lang-hr">Croatian</span></li><li class="lang-cs TnITTtw-option" index="11"><span id="lang-cs" val="cs" class="lang-cs">Czech</span></li><li class="lang-da TnITTtw-option" index="12"><span id="lang-da" val="da" class="lang-da">Danish</span></li><li class="lang-nl TnITTtw-option" index="13"><span id="lang-nl" val="nl" class="lang-nl">Dutch</span></li><li class="lang-en TnITTtw-option" index="14"><span id="lang-en" val="en" class="lang-en">English</span></li><li class="lang-et TnITTtw-option" index="15"><span id="lang-et" val="et" class="lang-et">Estonian</span></li><li class="lang-fi TnITTtw-option" index="16"><span id="lang-fi" val="fi" class="lang-fi">Finnish</span></li><li class="lang-fr TnITTtw-option" index="17"><span id="lang-fr" val="fr" class="lang-fr">French</span></li><li class="lang-de TnITTtw-option" index="18"><span id="lang-de" val="de" class="lang-de">German</span></li><li class="lang-el TnITTtw-option" index="19"><span id="lang-el" val="el" class="lang-el">Greek</span></li><li class="lang-gu TnITTtw-option" index="20"><span id="lang-gu" val="gu" class="lang-gu">Gujarati</span></li><li class="lang-ht TnITTtw-option" index="21"><span id="lang-ht" val="ht" class="lang-ht">Haitian Creole</span></li><li class="lang-iw TnITTtw-option" index="22"><span id="lang-iw" val="iw" class="lang-iw">Hebrew</span></li><li class="lang-hi TnITTtw-option" index="23"><span id="lang-hi" val="hi" class="lang-hi">Hindi</span></li><li class="lang-hu TnITTtw-option" index="24"><span id="lang-hu" val="hu" class="lang-hu">Hungarian</span></li><li class="lang-is TnITTtw-option" index="25"><span id="lang-is" val="is" class="lang-is">Icelandic</span></li><li class="lang-id TnITTtw-option" index="26"><span id="lang-id" val="id" class="lang-id">Indonesian</span></li><li class="lang-it TnITTtw-option" index="27"><span id="lang-it" val="it" class="lang-it">Italian</span></li><li class="lang-ja TnITTtw-option" index="28"><span id="lang-ja" val="ja" class="lang-ja">Japanese</span></li><li class="lang-kn TnITTtw-option" index="29"><span id="lang-kn" val="kn" class="lang-kn">Kannada</span></li><li class="lang-kk TnITTtw-option" index="30"><span id="lang-kk" val="kk" class="lang-kk">Kazakh</span></li><li class="lang-km TnITTtw-option" index="31"><span id="lang-km" val="km" class="lang-km">Khmer</span></li><li class="lang-ko TnITTtw-option" index="32"><span id="lang-ko" val="ko" class="lang-ko">Korean</span></li><li class="lang-ku TnITTtw-option" index="33"><span id="lang-ku" val="ku" class="lang-ku">Kurdish (Kurmanji)</span></li><li class="lang-lo TnITTtw-option" index="34"><span id="lang-lo" val="lo" class="lang-lo">Lao</span></li><li class="lang-lv TnITTtw-option" index="35"><span id="lang-lv" val="lv" class="lang-lv">Latvian</span></li><li class="lang-lt TnITTtw-option" index="36"><span id="lang-lt" val="lt" class="lang-lt">Lithuanian</span></li><li class="lang-mg TnITTtw-option" index="37"><span id="lang-mg" val="mg" class="lang-mg">Malagasy</span></li><li class="lang-ms TnITTtw-option" index="38"><span id="lang-ms" val="ms" class="lang-ms">Malay</span></li><li class="lang-ml TnITTtw-option" index="39"><span id="lang-ml" val="ml" class="lang-ml">Malayalam</span></li><li class="lang-mt TnITTtw-option" index="40"><span id="lang-mt" val="mt" class="lang-mt">Maltese</span></li><li class="lang-mi TnITTtw-option" index="41"><span id="lang-mi" val="mi" class="lang-mi">Maori</span></li><li class="lang-mr TnITTtw-option" index="42"><span id="lang-mr" val="mr" class="lang-mr">Marathi</span></li><li class="lang-my TnITTtw-option" index="43"><span id="lang-my" val="my" class="lang-my">Myanmar (Burmese)</span></li><li class="lang-ne TnITTtw-option" index="44"><span id="lang-ne" val="ne" class="lang-ne">Nepali</span></li><li class="lang-no TnITTtw-option" index="45"><span id="lang-no" val="no" class="lang-no">Norwegian</span></li><li class="lang-ps TnITTtw-option" index="46"><span id="lang-ps" val="ps" class="lang-ps">Pashto</span></li><li class="lang-fa TnITTtw-option" index="47"><span id="lang-fa" val="fa" class="lang-fa">Persian</span></li><li class="lang-pl TnITTtw-option" index="48"><span id="lang-pl" val="pl" class="lang-pl">Polish</span></li><li class="lang-pt TnITTtw-option" index="49"><span id="lang-pt" val="pt" class="lang-pt">Portuguese</span></li><li class="lang-pa TnITTtw-option" index="50"><span id="lang-pa" val="pa" class="lang-pa">Punjabi</span></li><li class="lang-ro TnITTtw-option" index="51"><span id="lang-ro" val="ro" class="lang-ro">Romanian</span></li><li class="lang-ru TnITTtw-option" index="52"><span id="lang-ru" val="ru" class="lang-ru">Russian</span></li><li class="lang-sm TnITTtw-option" index="53"><span id="lang-sm" val="sm" class="lang-sm">Samoan</span></li><li class="lang-zh-CN TnITTtw-option" index="54"><span id="lang-zh-CN" val="zh-CN" class="lang-zh-CN">Simplified Chinese</span></li><li class="lang-sk TnITTtw-option" index="55"><span id="lang-sk" val="sk" class="lang-sk">Slovak</span></li><li class="lang-sl TnITTtw-option" index="56"><span id="lang-sl" val="sl" class="lang-sl">Slovenian</span></li><li class="lang-es TnITTtw-option" index="57"><span id="lang-es" val="es" class="lang-es">Spanish</span></li><li class="lang-sv TnITTtw-option" index="58"><span id="lang-sv" val="sv" class="lang-sv">Swedish</span></li><li class="lang-ta TnITTtw-option" index="59"><span id="lang-ta" val="ta" class="lang-ta">Tamil</span></li><li class="lang-te TnITTtw-option" index="60"><span id="lang-te" val="te" class="lang-te">Telugu</span></li><li class="lang-th TnITTtw-option" index="61"><span id="lang-th" val="th" class="lang-th">Thai</span></li><li class="lang-zh-TW TnITTtw-option" index="62"><span id="lang-zh-TW" val="zh-TW" class="lang-zh-TW">Traditional Chinese</span></li><li class="lang-tr TnITTtw-option" index="63"><span id="lang-tr" val="tr" class="lang-tr">Turkish</span></li><li class="lang-uk TnITTtw-option" index="64"><span id="lang-uk" val="uk" class="lang-uk">Ukrainian</span></li><li class="lang-ur TnITTtw-option" index="65"><span id="lang-ur" val="ur" class="lang-ur">Urdu</span></li><li class="lang-vi TnITTtw-option_selected" index="66"><span id="lang-vi" val="vi" class="lang-vi">Vietnamese</span></li><li class="lang-cy TnITTtw-option" index="67"><span id="lang-cy" val="cy" class="lang-cy">Welsh</span></li></ul>                    </div>                </div>                <div id="sel-scrollbar-3">                    <div id="sel-track-3">                        <div id="sel-dragBar-3"></div>                    </div>                </div>            </div>        </div>    </div>    <div class="TnITTtw-fp-options" style="display: none;">        <input type="checkbox" id="TnITTtw-always-translate" readonly="readonly" style="display: none;"><label for="TnITTtw-always-translate" class="TnITTtw-always-translate-label TnITTtw-not-pro" style="display: none;"><span class="TnITTtw-always-translate-inner-label" style="display: none;">Always translate English to Vietnamese</span><span class="TnITTtw-pro-label" style="display: none;">PRO</span></label>        <br style="display: none;">        <input type="checkbox" id="TnITTtw-never-translate-lang" style="display: none;"><label for="TnITTtw-never-translate-lang" class="TnITTtw-never-translate-lang-label" style="display: none;">Never translate English</label>        <br style="display: none;">        <input type="checkbox" id="TnITTtw-never-translate-site" style="display: none;"><label for="TnITTtw-never-translate-site" class="TnITTtw-never-translate-site-label" style="display: none;">Never translate portswigger.net</label>    </div></div></body></html>
